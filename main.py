@@ -13,7 +13,7 @@ medTxt = pg.font.Font(None, 20)
 #length = int(input("Minimum length: "))
 braceletKnots = []
 #pygame.draw.rect(surface, color, pygame.Rect(100, 30, 25, 25))
-
+#test log
 class txtInputBox:
     def __init__(self, screen, x, y, w, h, showTxt="", txt=""):
         self.txtInput = pg.Rect(x, y, w, h)
