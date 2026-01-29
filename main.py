@@ -1,6 +1,8 @@
 import pygame as pg
 pg.init()
 from pygame.locals import *
+
+
 #surface = pg.display.set_mode((500, 500))
 surface = pg.display.set_mode((0, 0), pg.RESIZABLE)  # window
 background = (255, 255, 255)
@@ -13,7 +15,51 @@ medTxt = pg.font.Font(None, 20)
 #length = int(input("Minimum length: "))
 braceletKnots = []
 #pygame.draw.rect(surface, color, pygame.Rect(100, 30, 25, 25))
-#test log
+
+'''class bk:
+    def __init__(self, x, y, w, h,):
+        self.x = x
+        self.y = y'''
+
+class ColorPicker:
+    def __init__(self, x, y, l, size):
+        self.rect = pg.Rect(x, y, l, size)
+        self.image = pg.Surface((l, size))
+        self.image.fill((255, 255, 255))
+        self.rad = size//2
+        self.color = 0
+        self.pwidth = l-self.rad*2
+        for i in range(self.pwidth):
+            color = pg.Color(0)
+            color.hsla = (int(360*i/self.pwidth), 100, 50, 100)
+            pg.draw.rect(self.image, color, (i+self.rad, size//3, 1, size-2*size//3))
+        self.p = 0
+
+    '''def currentColor(self):
+        print("ok3")
+        print(self.color)
+        p = pg.Color(0)
+        p.hsla = (int(self.p * self.pwidth), 100, 50, 100)
+        self.color = p'''
+
+
+    def update(self):
+        mouse_buttons = pg.mouse.get_pressed()
+        mouse_pos = pg.mouse.get_pos()
+        if mouse_buttons[0] and self.rect.collidepoint(mouse_pos):
+            self.p = (mouse_pos[0] - self.rect.left - self.rad) / self.pwidth
+            self.p = (max(0, min(self.p, 1)))
+
+            getColor = pg.Color(0)
+            getColor.hsla = (int(self.p * self.pwidth), 100, 50, 100)
+            self.color = getColor
+
+    def draw(self, screen):
+        screen.blit(self.image, self.rect)
+        center = self.rect.left + self.rad + self.p * self.pwidth, self.rect.centery
+        pg.draw.circle(screen, self.color, center, self.rect.height // 2.5)
+
+
 class txtInputBox:
     def __init__(self, screen, x, y, w, h, showTxt="", txt=""):
         self.txtInput = pg.Rect(x, y, w, h)
@@ -78,7 +124,7 @@ class knotInfo:
         self.color = color
         self.ID = ID
 
-def editBitmap(event, x=0, y=0):
+def editBitmap(event, x=0, y=0, color=0):
     knotCount = 2
     found = True
 
@@ -92,7 +138,7 @@ def editBitmap(event, x=0, y=0):
                 for yRow in range(length):
                     testKnot = pg.Rect(xRow * 26 + x, yRow * 26 + y, 25, 25)
                     if testKnot.collidepoint(event.pos):
-                        braceletKnots[knotCount].color = (255, 0, 0)
+                        braceletKnots[knotCount].color = color
                         pg.draw.rect(surface, braceletKnots[knotCount].color, (xRow * 26 + x, yRow * 26 + y, 25, 25))
                         found = True
                     elif xRow >= width-1:
@@ -122,6 +168,8 @@ def main():
     yStringInput = txtInputBox(surface, 900, 250, 60, 30, "Length")
     xStringInput.update()
     yStringInput.update()
+
+    cp = ColorPicker(500, 50, 150, 40)
     #drawBitmap(5, 5)
 
     while True:
@@ -135,7 +183,7 @@ def main():
                 #y = surface.get_width()/100
                 pass
             elif event.type == pg.MOUSEBUTTONDOWN:
-                editBitmap(event, 50, 50)
+                editBitmap(event, 50, 50, cp.color)
             if event.type == pg.KEYDOWN:
                 pass
 
@@ -146,6 +194,9 @@ def main():
             yStringInput.event(event)
             yStringInput.update()
             yStringInput.displayTxt()
+
+            cp.update()
+            cp.draw(surface)
 
             if xStringInput.txt.isdigit() and yStringInput.txt.isdigit():
                 createBitmap(50, 50, int(xStringInput.txt), int(yStringInput.txt), True)
