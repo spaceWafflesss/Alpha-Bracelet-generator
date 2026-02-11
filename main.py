@@ -21,13 +21,25 @@ editScreen = True
         self.x = x
         self.y = y'''
 
-'''class button:
-    def __init__(self, x, y, w, h, showTxt=""):
+class button:
+    def __init__(self, screen, x, y, w, h, showTxt=""):
+        self.screen = screen
         self.txtInput = pg.Rect(x, y, w, h)
-        self.text = medTxt.render(showTxt, True, (0, 0, 0))
+        self.x = x
+        self.y =  y
+        self.text = medTxt.render(showTxt, True, (0, 255, 0))
 
-    def update(self, ):'''
+        pg.draw.rect(screen, (0, 0, 0), self.txtInput)
+        screen.blit(self.text, (self.x, self.y))
 
+    def isPressed(self, event):
+        pg.draw.rect(self.screen, (255, 255, 255), self.txtInput)
+        self.screen.blit(self.text, (self.x, self.y))
+        print("ok5")
+        if self.txtInput.collidepoint(event.pos):
+            return True
+        else:
+            return False
 
 class ColorPicker:
     def __init__(self, x, y, l, size):
@@ -186,6 +198,9 @@ def main():
     cp = ColorPicker(500, 50, 200, 40)
     # drawBitmap(5, 5)
     surface.fill((255, 255, 255))
+
+    displayEditGrid = button(surface, 300, 300, 60, 30, "Load")
+
     while editScreen:
         for event in pg.event.get():
             if event.type == pg.QUIT:
@@ -196,20 +211,24 @@ def main():
                 # x = surface.get_height()/100
                 # y = surface.get_width()/100
                 pass
-            elif pg.mouse.get_pressed()[2]:
-                print("ok5")
-                cp.color = surface.get_at(pg.mouse.get_pos())
-                cp.update(surface)
-            elif pg.mouse.get_pressed()[0]:
+            elif event.type == pg.MOUSEBUTTONDOWN:
+                if event.button == 1:# left click
+                    editBitmap(event, 50, 50, cp.color)
+                    cp.update(surface)
 
-                editBitmap(event, 50, 50, cp.color)
-                cp.update(surface)
+                    if xStringInput.txt.isdigit() and yStringInput.txt.isdigit() and displayEditGrid.isPressed(event):
+                        createBitmap(50, 50, int(xStringInput.txt), int(yStringInput.txt), True)
+                        print("ok1")
+
+                elif event.button == 3:  # right click
+                    print("ok5")
+                    cp.color = surface.get_at(pg.mouse.get_pos())
+                    cp.update(surface)
+
             elif event.type == pg.MOUSEWHEEL:
                 editScreen = False
             if event.type == pg.KEYDOWN:
-                if xStringInput.txt.isdigit() and yStringInput.txt.isdigit():
-                    createBitmap(50, 50, int(xStringInput.txt), int(yStringInput.txt), True)
-                    print("ok1")
+                pass
 
             xStringInput.event(event)
             xStringInput.update()
