@@ -27,14 +27,14 @@ class button:
         self.txtInput = pg.Rect(x, y, w, h)
         self.x = x
         self.y =  y
-        self.text = medTxt.render(showTxt, True, (0, 255, 0))
+        self.text = medTxt.render(showTxt, True, (0, 0, 0))
 
-        pg.draw.rect(screen, (0, 0, 0), self.txtInput)
-        screen.blit(self.text, (self.x, self.y))
+        pg.draw.rect(screen, (0, 204, 102), self.txtInput)
+        screen.blit(self.text, (self.x + 15, self.y + 9))
 
     def isPressed(self, event):
-        pg.draw.rect(self.screen, (255, 255, 255), self.txtInput)
-        self.screen.blit(self.text, (self.x, self.y))
+        pg.draw.rect(self.screen, (0, 204, 102), self.txtInput)
+        self.screen.blit(self.text, (self.x + 15, self.y + 9))
         print("ok5")
         if self.txtInput.collidepoint(event.pos):
             return True
@@ -140,51 +140,54 @@ class txtInputBox:
                     # drawBitmap(7, int(self.txt))
                     # print(self.txt)
                     self.color = (92, 93, 95)
-
-
-class knotInfo:
-    def __init__(self, ID, color):
-        self.color = color
-        self.ID = ID
-        self.length = 0
-        self.width = 0
+class knotList:
+    def __init__(self, width, length):
+        self.width = width
+        self.length = length
         self.braceletKnots = []
+        self.x = 0
+        self.y = 0
 
-    def edit(self, event, x=0, y=0, color=0):
-        knotCount = 2
-        found = True
-    
-        if not len(braceletKnots) == 0:
-            width = se
-            length = braceletKnots[1]
-            found = False
-    
-            while found == False:
-                for xRow in range(width):
-                    for yRow in range(length):
-                        testKnot = pg.Rect(xRow * 26 + x, yRow * 26 + y, 25, 25)
-                        if testKnot.collidepoint(event.pos):
-                            braceletKnots[knotCount].color = color
-                            pg.draw.rect(surface, braceletKnots[knotCount].color, (xRow * 26 + x, yRow * 26 + y, 25, 25))
-                            found = True
-                        elif xRow >= width - 1:
-                            found = True
-                    knotCount = knotCount + 1
+    class knotInfo:
+        def __init__(self, ID, color):
+            self.color = color
+            self.ID = ID
 
-    def load(self, x, y, width, length, create=False):
-        if create == True:
-            self.braceletKnots.clear()
-            self.width = width
-            self.length = length
-    
-            for knot in range(width * length):
-                self.braceletKnots.append(knotInfo(knot, (92, 93, 95)))
-    
+
+def editBitmap(event, bitmap, color=0):
+    found = True
+
+    if not len(bitmap.braceletKnots) == 0:
+        found = False
+
         knotCount = 0
-        for xRow in range(width):
-            for yRow in range(length):
-                pg.draw.rect(surface, braceletKnots[knotCount].color, (xRow * 26 + x, yRow * 26 + y, 25, 25))
-            knotCount = knotCount + 1
+        while found == False:
+            for xRow in range(bitmap.width):
+                for yRow in range(bitmap.length):
+                    testKnot = pg.Rect(xRow * 26 + bitmap.x, yRow * 26 + bitmap.y, 25, 25)
+                    if testKnot.collidepoint(event.pos):
+                        bitmap.braceletKnots[knotCount].color = color
+                        pg.draw.rect(surface, bitmap.braceletKnots[knotCount].color, (xRow * 26 + bitmap.x, yRow * 26 + bitmap.y, 25, 25))
+                        found = True
+                    elif xRow >= bitmap.width - 1:
+                        found = True
+                knotCount = knotCount + 1
+
+
+def createBitmap(x, y, bitmap, create=False):
+    if create == True:
+        bitmap.x = x
+        bitmap.y = y
+        bitmap.braceletKnots.clear()
+
+        for knot in range(bitmap.width * bitmap.length):
+            bitmap.braceletKnots.append(bitmap.knotInfo(knot, (92, 93, 95)))
+
+    knotCount = 0
+    for xRow in range(bitmap.width):
+        for yRow in range(bitmap.length):
+            pg.draw.rect(surface, bitmap.braceletKnots[knotCount].color, (xRow * 26 + x, yRow * 26 + y, 25, 25))
+        knotCount = knotCount + 1
 
 
 def main():
@@ -201,6 +204,8 @@ def main():
     surface.fill((255, 255, 255))
 
     displayEditGrid = button(surface, 300, 300, 60, 30, "Load")
+    global testy
+    hasCreatedBitmap = False
 
     while editScreen:
         for event in pg.event.get():
@@ -212,14 +217,21 @@ def main():
                 # x = surface.get_height()/100
                 # y = surface.get_width()/100
                 pass
-            elif event.type == pg.MOUSEBUTTONDOWN:
+
+            if pg.mouse.get_pressed()[0]:
+                if hasCreatedBitmap == True:
+                    editBitmap(event, testy, cp.color)
+
+            if event.type == pg.MOUSEBUTTONDOWN:
                 if event.button == 1:# left click
-                    editBitmap(event, 50, 50, cp.color)
+
                     cp.update(surface)
 
                     if xStringInput.txt.isdigit() and yStringInput.txt.isdigit() and displayEditGrid.isPressed(event):
-                        createBitmap(50, 50, int(xStringInput.txt), int(yStringInput.txt), True)
+                        testy = knotList(int(xStringInput.txt), int(yStringInput.txt))
+                        createBitmap(50, 50, testy, True)
                         print("ok1")
+                        hasCreatedBitmap = True
 
                 elif event.button == 3:  # right click
                     print("ok5")
