@@ -16,6 +16,8 @@ medTxt = pg.font.Font(None, 20)
 # pygame.draw.rect(surface, color, pygame.Rect(100, 30, 25, 25))
 editScreen = True
 
+knotMap = None
+
 '''class bk:
     def __init__(self, x, y, w, h,):
         self.x = x
@@ -171,7 +173,7 @@ def editBitmap(event, bitmap, color=0):
                         found = True
                     elif xRow >= bitmap.width - 1:
                         found = True
-                knotCount = knotCount + 1
+                    knotCount = knotCount + 1
 
 
 def createBitmap(x, y, bitmap, create=False):
@@ -187,24 +189,49 @@ def createBitmap(x, y, bitmap, create=False):
     for xRow in range(bitmap.width):
         for yRow in range(bitmap.length):
             pg.draw.rect(surface, bitmap.braceletKnots[knotCount].color, (xRow * 26 + x, yRow * 26 + y, 25, 25))
-        knotCount = knotCount + 1
+            knotCount = knotCount + 1
 
+def instructionScreen():
+    surface.fill((255, 255, 255))
+    back = button(surface, 30, 50, 60, 30, "Back")
+    global editScreen
+    global knotMap
+
+    if knotMap is not None:
+        createBitmap(100, 100, knotMap)
+    else:
+        print("ok6")
+
+    while editScreen == False:
+        for event in pg.event.get():
+            if event.type == pg.QUIT:
+                pg.quit()
+                return
+            if event.type == pg.MOUSEBUTTONDOWN:
+                if event.button == 1:# left click
+                    if back.isPressed(event):
+                        editScreen = True
+
+
+        pg.display.flip()
+        clock.tick(60)
 
 def main():
     # global surface
     # global x, y
     global editScreen
+    global knotMap
     xStringInput = txtInputBox(surface, 900, 200, 60, 30, "Strings")
     yStringInput = txtInputBox(surface, 900, 250, 60, 30, "Length")
     xStringInput.update()
     yStringInput.update()
 
-    cp = ColorPicker(500, 50, 200, 40)
+    cp = ColorPicker(500, 30, 200, 40)
     # drawBitmap(5, 5)
     surface.fill((255, 255, 255))
 
-    displayEditGrid = button(surface, 300, 300, 60, 30, "Load")
-    global testy
+    displayEditGrid = button(surface, 900, 300, 60, 30, "Load")
+    displayInstruction = button(surface, 900, 100, 60, 30, "Apply")
     hasCreatedBitmap = False
 
     while editScreen:
@@ -220,18 +247,21 @@ def main():
 
             if pg.mouse.get_pressed()[0]:
                 if hasCreatedBitmap == True:
-                    editBitmap(event, testy, cp.color)
+                    editBitmap(event, knotMap, cp.color)
 
             if event.type == pg.MOUSEBUTTONDOWN:
-                if event.button == 1:# left click
+                if event.button == 1:  # left click
 
                     cp.update(surface)
 
                     if xStringInput.txt.isdigit() and yStringInput.txt.isdigit() and displayEditGrid.isPressed(event):
-                        testy = knotList(int(xStringInput.txt), int(yStringInput.txt))
-                        createBitmap(50, 50, testy, True)
+                        knotMap = knotList(int(xStringInput.txt), int(yStringInput.txt))
+                        createBitmap(50, 50, knotMap, True)
                         print("ok1")
                         hasCreatedBitmap = True
+
+                    if displayInstruction.isPressed(event) and hasCreatedBitmap:
+                        editScreen = False
 
                 elif event.button == 3:  # right click
                     print("ok5")
@@ -239,7 +269,7 @@ def main():
                     cp.update(surface)
 
             elif event.type == pg.MOUSEWHEEL:
-                editScreen = False
+                pass
             if event.type == pg.KEYDOWN:
                 pass
 
@@ -260,17 +290,9 @@ def main():
         pg.display.flip()
         clock.tick(60)
 
-    while not editScreen:
-        surface.fill((255, 255, 255))
-        pg.display.flip()
-        clock.tick(60)
 
-
-# Execute game:
-
-
-'''input_box = pg.draw.rect(surface, (0,  0, 0), (100, 180, 100, 32), 1)
-pg.display.flip()
-pg.time.wait(5000)  # Pause for 3 seconds
-pg.quit()'''
-main()
+while True:
+    if  editScreen:
+        main()
+    elif editScreen == False:
+        instructionScreen()
