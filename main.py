@@ -1,7 +1,7 @@
 import pygame as pg
 pg.init()
 from pygame.locals import *
-
+import pygame.gfxdraw as gfx
 # surface = pg.display.set_mode((500, 500))
 surface = pg.display.set_mode((0, 0), pg.RESIZABLE)  # window
 background = (255, 255, 255)
@@ -31,11 +31,11 @@ class button:
         self.y =  y
         self.text = medTxt.render(showTxt, True, (0, 0, 0))
 
-        pg.draw.rect(screen, (0, 204, 102), self.txtInput)
+        pg.draw.rect(screen, (0, 204, 102), self.txtInput, border_radius=5)
         screen.blit(self.text, (self.x + 15, self.y + 9))
 
     def isPressed(self, event):
-        pg.draw.rect(self.screen, (0, 204, 102), self.txtInput)
+        pg.draw.rect(self.screen, (0, 204, 102), self.txtInput, border_radius=5)
         self.screen.blit(self.text, (self.x + 15, self.y + 9))
         print("ok5")
         if self.txtInput.collidepoint(event.pos):
@@ -55,7 +55,7 @@ class ColorPicker:
         for i in range(self.pwidth):
             color = pg.Color(0)
             color.hsla = (int(360 * i / self.pwidth), 100, 50, 100)
-            pg.draw.rect(self.image, color, (i + self.rad, size // 3, 1, size - 2 * size // 3))
+            pg.draw.rect(self.image, color, (i + self.rad, size // 3, 1, size - 2 * size // 3), border_radius=5)
         self.p = 0
 
     '''def currentColor(self):
@@ -114,7 +114,7 @@ class txtInputBox:
         width = max(self.w, self.txt_surface.get_width() + 10)
         self.txtInput.w = width
         # Blit the input_box rect.
-        pg.draw.rect(self.screen, self.color, self.txtInput, 2, 1)
+        pg.draw.rect(self.screen, self.color, self.txtInput, 2, border_radius=5)
 
     # previously called event
     def event(self, event):
@@ -198,9 +198,28 @@ def instructionScreen():
     global knotMap
 
     if knotMap is not None:
-        createBitmap(100, 100, knotMap)
+        #createBitmap(100, 100, knotMap)
+        pass
     else:
         print("ok6")
+
+    pg.draw.circle(surface, (255, 38, 0), (900, 480), 10)
+    #pg.draw.rect(surface, (0, 0, 0), pg.Rect(400, 260, 20, 70), 1, border_radius=15)
+
+    text = medTxt.render("->", True, (0, 255, 0))
+    x,y = 60, 50
+
+    bt = 35
+    knotCount = 0
+    for xRow in range(knotMap.width):
+        pg.draw.rect(surface, (0, 0, 0), pg.Rect(xRow * bt + x, y, 20, knotMap.length * bt + 10), 1, border_radius=15)
+
+        for yRow in range(knotMap.length):
+            gfx.filled_circle(surface, (0, 0, 0), (xRow * bt + x, yRow * bt + y), 16)
+            gfx.filled_circle(surface, knotMap.braceletKnots[knotCount].color, (xRow * bt + x, yRow * bt + y), 15)
+            surface.blit(text, (xRow * bt + x, yRow * bt + y))
+            knotCount = knotCount + 1
+
 
     while editScreen == False:
         for event in pg.event.get():
