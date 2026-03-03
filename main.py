@@ -207,17 +207,22 @@ def instructionScreen():
     #pg.draw.rect(surface, (0, 0, 0), pg.Rect(400, 260, 20, 70), 1, border_radius=15)
 
     text = medTxt.render("->", True, (0, 255, 0))
-    x,y = 60, 50
+    x,y = 100, 100
 
-    bt = 35
+    bt = 38
     knotCount = 0
     for xRow in range(knotMap.width):
-        pg.draw.rect(surface, (0, 0, 0), pg.Rect(xRow * bt + x, y, 20, knotMap.length * bt + 10), 1, border_radius=15)
+        pg.draw.rect(surface, (0, 0, 0), pg.Rect(xRow * bt + x - 8, y - 50, 17, knotMap.length * bt + 50), 1, border_radius=15)
+        pg.draw.line(surface, (218, 218, 218), (xRow * bt + x, y - 40), (xRow * bt + x, knotMap.length * bt + 90), 3)
 
         for yRow in range(knotMap.length):
-            gfx.filled_circle(surface, (0, 0, 0), (xRow * bt + x, yRow * bt + y), 16)
-            gfx.filled_circle(surface, knotMap.braceletKnots[knotCount].color, (xRow * bt + x, yRow * bt + y), 15)
-            surface.blit(text, (xRow * bt + x, yRow * bt + y))
+            gfx.filled_circle(surface, xRow * bt + x, yRow * bt + y, 15, knotMap.braceletKnots[knotCount].color)
+            gfx.aacircle(surface, xRow * bt + x, yRow * bt + y, 15, knotMap.braceletKnots[knotCount].color)
+
+            gfx.aacircle(surface, xRow * bt + x, yRow * bt + y, 16, (0, 0, 0))
+            gfx.aacircle(surface, xRow * bt + x, yRow * bt + y, 17, (0, 0, 0))
+
+            surface.blit(text, (xRow * bt + x - 10, yRow * bt + y - 10))
             knotCount = knotCount + 1
 
 
