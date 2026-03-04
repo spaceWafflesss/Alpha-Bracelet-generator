@@ -205,25 +205,50 @@ def instructionScreen():
 
     pg.draw.circle(surface, (255, 38, 0), (900, 480), 10)
     #pg.draw.rect(surface, (0, 0, 0), pg.Rect(400, 260, 20, 70), 1, border_radius=15)
+    arrowOut = pg.font.Font(None, 30)
+    arrowIn = pg.font.Font(None, 29)
+    text = medTxt.render("HI!", True, (0, 255, 0))
+    x,y = 150, 100
 
-    text = medTxt.render("->", True, (0, 255, 0))
-    x,y = 100, 100
-
-    bt = 38
+    spacing = 38
     knotCount = 0
+    direction = False
+
     for xRow in range(knotMap.width):
-        pg.draw.rect(surface, (0, 0, 0), pg.Rect(xRow * bt + x - 8, y - 50, 17, knotMap.length * bt + 50), 1, border_radius=15)
-        pg.draw.line(surface, (218, 218, 218), (xRow * bt + x, y - 40), (xRow * bt + x, knotMap.length * bt + 90), 3)
+        posX = x + xRow * spacing
+
+        #center empty rectangle through circles
+        recWidth = 12
+        pg.draw.rect(surface, (0, 0, 0), pg.Rect(posX - recWidth // 2, y - 50, recWidth, knotMap.length * spacing + 50), 1, border_radius=15)
+        pg.draw.line(surface, (218, 218, 218), (posX, y - 40), (posX, knotMap.length * spacing + 90), 3)
+
+        if xRow == 0:
+            direction = not direction
 
         for yRow in range(knotMap.length):
-            gfx.filled_circle(surface, xRow * bt + x, yRow * bt + y, 15, knotMap.braceletKnots[knotCount].color)
-            gfx.aacircle(surface, xRow * bt + x, yRow * bt + y, 15, knotMap.braceletKnots[knotCount].color)
+            posY = y + yRow * spacing
 
-            gfx.aacircle(surface, xRow * bt + x, yRow * bt + y, 16, (0, 0, 0))
-            gfx.aacircle(surface, xRow * bt + x, yRow * bt + y, 17, (0, 0, 0))
+            gfx.filled_circle(surface, posX, posY, 15, knotMap.braceletKnots[knotCount].color)
+            gfx.aacircle(surface, posX, posY, 15, knotMap.braceletKnots[knotCount].color)
 
-            surface.blit(text, (xRow * bt + x - 10, yRow * bt + y - 10))
+            gfx.aacircle(surface, posX, posY, 16, (0, 0, 0))
+            gfx.aacircle(surface, posX, posY, 17, (0, 0, 0))
+
+
+
+            if direction == True:
+                text = arrowIn.render("->", True, (255, 255, 255))
+                surface.blit(text, (posX - 10, posY - 10)) # center text in circle
+                text = arrowOut.render("->", True, (0, 0, 0))
+                surface.blit(text, (posX - 10, posY - 10))  # center text in circle
+            else:
+                text = arrowIn.render("<-", True, (255, 255, 255))
+                surface.blit(text, (posX - 10, posY - 10))  # center text in circle
+                text = arrowOut.render("<-", True, (0, 0, 0))
+                surface.blit(text, (posX - 10, posY - 10))  # center text in circle
+
             knotCount = knotCount + 1
+
 
 
     while editScreen == False:
