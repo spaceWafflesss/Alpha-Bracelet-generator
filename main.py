@@ -2,6 +2,8 @@ import pygame as pg
 pg.init()
 from pygame.locals import *
 import pygame.gfxdraw as gfx
+
+import time
 # surface = pg.display.set_mode((500, 500))
 surface = pg.display.set_mode((0, 0), pg.RESIZABLE)  # window
 background = (255, 255, 255)
@@ -214,40 +216,45 @@ def instructionScreen():
     knotCount = 0
     direction = False
 
-    for xRow in range(knotMap.width):
-        posX = x + xRow * spacing
+    for run in range(1, 2):
+        for xRow in range(knotMap.width):
+            posX = x + xRow * spacing
+    
+            # center empty rectangle through circles
+            recWidth = 12
+            pg.draw.rect(surface, (0, 0, 0), pg.Rect(posX - recWidth // 2, y - 50, recWidth, knotMap.length * spacing + 50),1, border_radius=15)
+            # draw grey line in between
+            pg.draw.line(surface, (218, 218, 218), (posX, y - 40), (posX, knotMap.length * spacing + 90), 3)
+    
+            for yRow in range(knotMap.length):
+                posY = y + yRow * spacing
+    
+                if run == 1:
+                    # add code for string lines here
+                    pass
+                else:
+                    gfx.filled_circle(surface, posX, posY, 15, knotMap.braceletKnots[knotCount].color)
+                    gfx.aacircle(surface, posX, posY, 15, knotMap.braceletKnots[knotCount].color)
+        
+                    gfx.aacircle(surface, posX, posY, 16, (0, 0, 0))
+                    gfx.aacircle(surface, posX, posY, 17, (0, 0, 0))
+        
+                    if direction == True:
+                        text = arrowIn.render("->", True, (255, 255, 255))
+                        surface.blit(text, (posX - 10, posY - 10)) # center text in circle
+                        text = arrowOut.render("->", True, (0, 0, 0))
+                        surface.blit(text, (posX - 10, posY - 10))  # center text in circle
+                    else:
+                        text = arrowIn.render("<-", True, (255, 255, 255))
+                        surface.blit(text, (posX - 10, posY - 10))  # center text in circle
+                        text = arrowOut.render("<-", True, (0, 0, 0))
+                        surface.blit(text, (posX - 10, posY - 10))  # center text in circle
+    
+                direction = not direction
+                knotCount = knotCount + 1
 
-        #center empty rectangle through circles
-        recWidth = 12
-        pg.draw.rect(surface, (0, 0, 0), pg.Rect(posX - recWidth // 2, y - 50, recWidth, knotMap.length * spacing + 50), 1, border_radius=15)
-        pg.draw.line(surface, (218, 218, 218), (posX, y - 40), (posX, knotMap.length * spacing + 90), 3)
-
-        if xRow == 0:
-            direction = not direction
-
-        for yRow in range(knotMap.length):
-            posY = y + yRow * spacing
-
-            gfx.filled_circle(surface, posX, posY, 15, knotMap.braceletKnots[knotCount].color)
-            gfx.aacircle(surface, posX, posY, 15, knotMap.braceletKnots[knotCount].color)
-
-            gfx.aacircle(surface, posX, posY, 16, (0, 0, 0))
-            gfx.aacircle(surface, posX, posY, 17, (0, 0, 0))
-
-
-
-            if direction == True:
-                text = arrowIn.render("->", True, (255, 255, 255))
-                surface.blit(text, (posX - 10, posY - 10)) # center text in circle
-                text = arrowOut.render("->", True, (0, 0, 0))
-                surface.blit(text, (posX - 10, posY - 10))  # center text in circle
-            else:
-                text = arrowIn.render("<-", True, (255, 255, 255))
-                surface.blit(text, (posX - 10, posY - 10))  # center text in circle
-                text = arrowOut.render("<-", True, (0, 0, 0))
-                surface.blit(text, (posX - 10, posY - 10))  # center text in circle
-
-            knotCount = knotCount + 1
+                #pg.display.update()  # show the new circle
+                #pg.time.delay(1000)  # 1000 ms = 1 second
 
 
 
