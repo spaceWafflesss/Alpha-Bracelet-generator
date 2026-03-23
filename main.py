@@ -215,7 +215,7 @@ def instructionScreen():
 
     spacing = 38
     knotCount = 0
-    direction = False
+    direction = True
     ran = False
 
     # color, coorodinates
@@ -232,32 +232,26 @@ def instructionScreen():
                 self.y = y
 
     lineCords = colorPoints()
+    global posX
     posX = x + spacing
+
     for run in range(0, 2):
         print(run)
         knotCount = 0
         for yRow in range(knotMap.length):
             posY = y + yRow * spacing
-
-
             direction = not direction
-
-            # center empty rectangle through circles
-            if run == 0:
-                recWidth = 12
-                pg.draw.rect(surface, (0, 0, 0), pg.Rect(posX - recWidth // 2, y - 50, recWidth, knotMap.length * spacing + 50),1, border_radius=15)
-
-                # draw grey line in between
-                pg.draw.line(surface, (218, 218, 218), (posX, y - 40), (posX, knotMap.length * spacing + 90), 3)
-
 
             for xRow in range(knotMap.width):
                 posX = x + xRow * spacing
 
                 if run == 0:
-                    if ran == False:
-                        #lineCords.braceletKnots.append(lineCords.knotInfo(knotMap.braceletKnots[0].color, posX, posY))
-                        ran = True
+                    recWidth = 12
+                    # center empty rectangle through circles
+                    pg.draw.rect(surface, (0, 0, 0), pg.Rect(posX - recWidth // 2, y - 50, recWidth, knotMap.length * spacing + 50), 1, border_radius=15)
+
+                    # draw grey line in between
+                    pg.draw.line(surface, (218, 218, 218), (posX, y - 40), (posX, knotMap.length * spacing + 90), 3)
 
 
                     lining = True
@@ -272,13 +266,13 @@ def instructionScreen():
                             lineCords.braceletKnots[i].y = posY
                             lining = False'''
 
-                    for i in range(len(lineCords.braceletKnots)):
+                    '''for i in range(len(lineCords.braceletKnots)):
                         if lineCords.braceletKnots[i].color != knotMap.braceletKnots[knotCount].color:
                             lineCords.braceletKnots.append(lineCords.knotInfo(lineCords.braceletKnots[i].color, posX, posY))
                         else:
                             pg.draw.line(surface, lineCords.braceletKnots[i].color, (posX, posY),(lineCords.braceletKnots[i].x, lineCords.braceletKnots[i].y), 6)
                             lineCords.braceletKnots[i].x = posX
-                            lineCords.braceletKnots[i].y = posY
+                            lineCords.braceletKnots[i].y = posY'''
 
                 else:
                     gfx.filled_circle(surface, posX, posY, 15, knotMap.braceletKnots[knotCount].color)
