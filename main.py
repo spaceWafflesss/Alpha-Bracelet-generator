@@ -158,7 +158,6 @@ class knotList:
             self.color = color
             self.ID = ID
 
-
 def editBitmap(event, bitmap, color=0):
     found = True
 
@@ -167,8 +166,8 @@ def editBitmap(event, bitmap, color=0):
 
         knotCount = 0
         while found == False:
-            for xRow in range(bitmap.width):
-                for yRow in range(bitmap.length):
+            for yRow in range(bitmap.length):
+                for xRow in range(bitmap.width):
                     testKnot = pg.Rect(xRow * 26 + bitmap.x, yRow * 26 + bitmap.y, 25, 25)
                     if testKnot.collidepoint(event.pos):
                         bitmap.braceletKnots[knotCount].color = color
@@ -177,7 +176,6 @@ def editBitmap(event, bitmap, color=0):
                     elif xRow >= bitmap.width - 1:
                         found = True
                     knotCount = knotCount + 1
-
 
 def createBitmap(x, y, bitmap, create=False):
     if create == True:
@@ -214,6 +212,7 @@ def instructionScreen():
     x,y = 150, 100
 
     spacing = 38
+    global knotCount
     knotCount = 0
     direction = True
     ran = False
@@ -232,15 +231,15 @@ def instructionScreen():
                 self.y = y
 
     lineCords = colorPoints()
+
     global posX
     posX = x + spacing
 
     for run in range(0, 2):
-        print(run)
         knotCount = 0
+
         for yRow in range(knotMap.length):
             posY = y + yRow * spacing
-            direction = not direction
 
             for xRow in range(knotMap.width):
                 posX = x + xRow * spacing
@@ -256,23 +255,16 @@ def instructionScreen():
 
                     lining = True
                     i = 0
-                    '''while lining == True:
-                        if lineCords.braceletKnots[i].color != knotMap.braceletKnots[knotCount].color:
+                    while lining == True:
+                        if len(lineCords.braceletKnots) == 0 or lineCords.braceletKnots[i].color != knotMap.braceletKnots[knotCount].color:
                             lineCords.braceletKnots.append(lineCords.knotInfo(lineCords.braceletKnots[i].color, posX, posY))
+                            print(i)
                             i = i +  1
                         else:
                             pg.draw.line(surface, lineCords.braceletKnots[i].color, (posX, posY),(lineCords.braceletKnots[i].x, lineCords.braceletKnots[i].y), 6)
                             lineCords.braceletKnots[i].x = posX
                             lineCords.braceletKnots[i].y = posY
-                            lining = False'''
-
-                    '''for i in range(len(lineCords.braceletKnots)):
-                        if lineCords.braceletKnots[i].color != knotMap.braceletKnots[knotCount].color:
-                            lineCords.braceletKnots.append(lineCords.knotInfo(lineCords.braceletKnots[i].color, posX, posY))
-                        else:
-                            pg.draw.line(surface, lineCords.braceletKnots[i].color, (posX, posY),(lineCords.braceletKnots[i].x, lineCords.braceletKnots[i].y), 6)
-                            lineCords.braceletKnots[i].x = posX
-                            lineCords.braceletKnots[i].y = posY'''
+                            lining = False
 
                 else:
                     gfx.filled_circle(surface, posX, posY, 15, knotMap.braceletKnots[knotCount].color)
@@ -281,17 +273,20 @@ def instructionScreen():
                     gfx.aacircle(surface, posX, posY, 16, (0, 0, 0))
                     gfx.aacircle(surface, posX, posY, 17, (0, 0, 0))
 
-                    if direction == True:
+                    if direction:
                         text = arrowIn.render("->", True, (255, 255, 255))
                         surface.blit(text, (posX - 10, posY - 10))  # center text in circle
                         text = arrowOut.render("->", True, (0, 0, 0))
                         surface.blit(text, (posX - 10, posY - 10))  # center text in circle
+
                     else:
                         text = arrowIn.render("<-", True, (255, 255, 255))
                         surface.blit(text, (posX - 10, posY - 10))  # center text in circle
                         text = arrowOut.render("<-", True, (0, 0, 0))
                         surface.blit(text, (posX - 10, posY - 10))  # center text in circle
 
+                    if xRow+1 == knotMap.width:
+                        direction = not direction
 
                 knotCount = knotCount + 1
 
@@ -357,14 +352,12 @@ def main():
                     if xStringInput.txt.isdigit() and yStringInput.txt.isdigit() and displayEditGrid.isPressed(event):
                         knotMap = knotList(int(xStringInput.txt), int(yStringInput.txt))
                         createBitmap(50, 50, knotMap, True)
-                        print("ok1")
                         hasCreatedBitmap = True
 
                     if displayInstruction.isPressed(event) and hasCreatedBitmap:
                         editScreen = False
 
                 elif event.button == 3:  # right click
-                    print("ok5")
                     cp.color = surface.get_at(pg.mouse.get_pos())
                     cp.update(surface)
 
