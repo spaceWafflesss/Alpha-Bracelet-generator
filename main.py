@@ -39,7 +39,6 @@ class button:
     def isPressed(self, event):
         pg.draw.rect(self.screen, (0, 204, 102), self.txtInput, border_radius=5)
         self.screen.blit(self.text, (self.x + 15, self.y + 9))
-        print("ok5")
         if self.txtInput.collidepoint(event.pos):
             return True
         else:
@@ -255,17 +254,18 @@ def instructionScreen():
 
                     lining = True
                     i = 0
-                    while lining == True:
-                        if len(lineCords.braceletKnots) == 0 or lineCords.braceletKnots[i].color != knotMap.braceletKnots[knotCount].color:
-                            lineCords.braceletKnots.append(lineCords.knotInfo(lineCords.braceletKnots[i].color, posX, posY))
-                            print(i)
-                            i = i +  1
+                    while lining:
+                        if len(lineCords.braceletKnots) == 0  or i == len(lineCords.braceletKnots):
+                            lineCords.braceletKnots.append(lineCords.knotInfo(knotMap.braceletKnots[knotCount].color, posX, posY))
+                            lining = False
+                        elif lineCords.braceletKnots[i].color != knotMap.braceletKnots[knotCount].color:
+                            i += 1
                         else:
-                            pg.draw.line(surface, lineCords.braceletKnots[i].color, (posX, posY),(lineCords.braceletKnots[i].x, lineCords.braceletKnots[i].y), 6)
+                            pg.draw.line(surface, lineCords.braceletKnots[i].color, (posX, posY),
+                                         (lineCords.braceletKnots[i].x, lineCords.braceletKnots[i].y), 6)
                             lineCords.braceletKnots[i].x = posX
                             lineCords.braceletKnots[i].y = posY
                             lining = False
-
                 else:
                     gfx.filled_circle(surface, posX, posY, 15, knotMap.braceletKnots[knotCount].color)
                     gfx.aacircle(surface, posX, posY, 15, knotMap.braceletKnots[knotCount].color)
@@ -285,10 +285,17 @@ def instructionScreen():
                         text = arrowOut.render("<-", True, (0, 0, 0))
                         surface.blit(text, (posX - 10, posY - 10))  # center text in circle
 
-                    if xRow+1 == knotMap.width:
-                        direction = not direction
+                if xRow+1 == knotMap.width:
+                    direction = not direction
+                    knotCount = knotCount - knotMap.width
+                elif xRow == 0 and direction == False:
+                    knotCount = knotCount + knotMap.width
+                    direction = not direction
 
-                knotCount = knotCount + 1
+                if direction:
+                    knotCount = knotCount - 1
+                else:
+                    knotCount = knotCount + 1
 
 
 
