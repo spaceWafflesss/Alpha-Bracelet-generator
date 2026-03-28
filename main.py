@@ -158,7 +158,6 @@ class knotList:
             self.ID = ID
 
 def editBitmap(event, bitmap, color=0):
-    found = True
 
     if not len(bitmap.braceletKnots) == 0:
         found = False
@@ -213,8 +212,6 @@ def instructionScreen():
     spacing = 38
     global knotCount
     knotCount = 0
-    direction = True
-    ran = False
 
     # color, coorodinates
     #linesCords = []
@@ -231,6 +228,7 @@ def instructionScreen():
 
     lineCords = colorPoints()
 
+    oldRow = None
     global posX
     posX = x + spacing
 
@@ -240,16 +238,26 @@ def instructionScreen():
         for yRow in range(knotMap.length):
             posY = y + yRow * spacing
 
-            for xRow in range(knotMap.width):
+            if yRow % 2 == 0:
+                x_range = range(knotMap.width)
+                direction = True
+            else:
+                x_range = range(knotMap.width - 1, -1, -1)
+                direction = False
+
+            for xRow in x_range:
                 posX = x + xRow * spacing
 
                 if run == 0:
                     recWidth = 12
-                    # center empty rectangle through circles
-                    pg.draw.rect(surface, (0, 0, 0), pg.Rect(posX - recWidth // 2, y - 50, recWidth, knotMap.length * spacing + 50), 1, border_radius=15)
 
-                    # draw grey line in between
-                    pg.draw.line(surface, (218, 218, 218), (posX, y - 40), (posX, knotMap.length * spacing + 90), 3)
+                    if oldRow != xRow and yRow == 0:
+                        # center empty rectangle through circles
+                        pg.draw.rect(surface, (0, 0, 0), pg.Rect(posX - recWidth // 2, y - 50, recWidth, knotMap.length * spacing + 50), 1, border_radius=15)
+
+                        # draw grey line in between
+                        pg.draw.line(surface, (218, 218, 218), (posX, y - 40), (posX, knotMap.length * spacing + 90), 3)
+                        oldRow = xRow
 
 
                     lining = True
@@ -261,8 +269,7 @@ def instructionScreen():
                         elif lineCords.braceletKnots[i].color != knotMap.braceletKnots[knotCount].color:
                             i += 1
                         else:
-                            pg.draw.line(surface, lineCords.braceletKnots[i].color, (posX, posY),
-                                         (lineCords.braceletKnots[i].x, lineCords.braceletKnots[i].y), 6)
+                            pg.draw.line(surface, lineCords.braceletKnots[i].color, (posX, posY), (lineCords.braceletKnots[i].x, lineCords.braceletKnots[i].y), 6)
                             lineCords.braceletKnots[i].x = posX
                             lineCords.braceletKnots[i].y = posY
                             lining = False
@@ -285,18 +292,12 @@ def instructionScreen():
                         text = arrowOut.render("<-", True, (0, 0, 0))
                         surface.blit(text, (posX - 10, posY - 10))  # center text in circle
 
-                if xRow+1 == knotMap.width:
-                    direction = not direction
-                    knotCount = knotCount - knotMap.width
+                '''if xRow+1 == knotMap.width:
+                    direction = False
                 elif xRow == 0 and direction == False:
-                    knotCount = knotCount + knotMap.width
-                    direction = not direction
+                    direction = True'''
 
-                if direction:
-                    knotCount = knotCount - 1
-                else:
-                    knotCount = knotCount + 1
-
+                knotCount = knotCount + 1
 
 
                 pg.display.update()  # show the new circle
