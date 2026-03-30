@@ -184,9 +184,10 @@ def createBitmap(x, y, bitmap, create=False):
         for knot in range(bitmap.width * bitmap.length):
             bitmap.braceletKnots.append(bitmap.knotInfo(knot, (92, 93, 95)))
 
+
     knotCount = 0
-    for xRow in range(bitmap.width):
-        for yRow in range(bitmap.length):
+    for yRow in range(bitmap.length):
+        for xRow in range(bitmap.width):
             pg.draw.rect(surface, bitmap.braceletKnots[knotCount].color, (xRow * 26 + x, yRow * 26 + y, 25, 25))
             knotCount = knotCount + 1
 
@@ -209,7 +210,8 @@ def instructionScreen():
     text = medTxt.render("HI!", True, (0, 255, 0))
     x,y = 150, 100
 
-    spacing = 38
+    spacing = 80
+    size = 2
     global knotCount
     knotCount = 0
 
@@ -233,7 +235,7 @@ def instructionScreen():
     posX = x + spacing
 
     for run in range(0, 2):
-        knotCount = 0
+        #knotCount = 0
 
         for yRow in range(knotMap.length):
             posY = y + yRow * spacing
@@ -241,44 +243,53 @@ def instructionScreen():
             if yRow % 2 == 0:
                 x_range = range(knotMap.width)
                 direction = True
+                knotCount = knotCount - knotMap.width
             else:
                 x_range = range(knotMap.width - 1, -1, -1)
                 direction = False
+                knotCount = knotCount + knotMap.width
 
             for xRow in x_range:
                 posX = x + xRow * spacing
+                knotCount = yRow * knotMap.width + xRow
 
                 if run == 0:
                     recWidth = 12
-
+                    recWidth = recWidth * size
                     if oldRow != xRow and yRow == 0:
                         # center empty rectangle through circles
                         pg.draw.rect(surface, (0, 0, 0), pg.Rect(posX - recWidth // 2, y - 50, recWidth, knotMap.length * spacing + 50), 1, border_radius=15)
 
                         # draw grey line in between
-                        pg.draw.line(surface, (218, 218, 218), (posX, y - 40), (posX, knotMap.length * spacing + 90), 3)
+                        pg.draw.line(surface, (218, 218, 218), (posX, y - 40), (posX, knotMap.length * spacing + 90), 3 * size)
                         oldRow = xRow
 
 
                     lining = True
                     i = 0
                     while lining:
-                        if len(lineCords.braceletKnots) == 0  or i == len(lineCords.braceletKnots):
+                        if len(lineCords.braceletKnots) == 0 or i == len(lineCords.braceletKnots):
                             lineCords.braceletKnots.append(lineCords.knotInfo(knotMap.braceletKnots[knotCount].color, posX, posY))
+
+                            if direction == False:
+                                pg.draw.line(surface, lineCords.braceletKnots[i].color, (posX, posY), (posX + x_range + 50, posY), 6 * size)
+                            else:
+                                pg.draw.line(surface, lineCords.braceletKnots[i].color, (posX, posY), (posX - xRow -50, posY), 6 * size)
+
                             lining = False
                         elif lineCords.braceletKnots[i].color != knotMap.braceletKnots[knotCount].color:
                             i += 1
                         else:
-                            pg.draw.line(surface, lineCords.braceletKnots[i].color, (posX, posY), (lineCords.braceletKnots[i].x, lineCords.braceletKnots[i].y), 6)
+                            pg.draw.line(surface, lineCords.braceletKnots[i].color, (posX, posY), (lineCords.braceletKnots[i].x, lineCords.braceletKnots[i].y), 8 * size)
                             lineCords.braceletKnots[i].x = posX
                             lineCords.braceletKnots[i].y = posY
                             lining = False
                 else:
-                    gfx.filled_circle(surface, posX, posY, 15, knotMap.braceletKnots[knotCount].color)
-                    gfx.aacircle(surface, posX, posY, 15, knotMap.braceletKnots[knotCount].color)
+                    gfx.filled_circle(surface, posX, posY, 15 * size, knotMap.braceletKnots[knotCount].color)
+                    gfx.aacircle(surface, posX, posY, 15 * size, knotMap.braceletKnots[knotCount].color)
 
-                    gfx.aacircle(surface, posX, posY, 16, (0, 0, 0))
-                    gfx.aacircle(surface, posX, posY, 17, (0, 0, 0))
+                    gfx.aacircle(surface, posX, posY, 16 * size, (0, 0, 0))
+                    gfx.aacircle(surface, posX, posY, 17 * size, (0, 0, 0))
 
                     if direction:
                         text = arrowIn.render("->", True, (255, 255, 255))
@@ -292,12 +303,12 @@ def instructionScreen():
                         text = arrowOut.render("<-", True, (0, 0, 0))
                         surface.blit(text, (posX - 10, posY - 10))  # center text in circle
 
-                '''if xRow+1 == knotMap.width:
-                    direction = False
-                elif xRow == 0 and direction == False:
-                    direction = True'''
+                '''if direction == False:
+                    knotCount = knotCount + 1
+                elif direction == True:
+                    knotCount = knotCount - 1'''
 
-                knotCount = knotCount + 1
+                #knotCount = knotCount + 1
 
 
                 pg.display.update()  # show the new circle
