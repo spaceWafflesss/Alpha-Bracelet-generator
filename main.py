@@ -214,6 +214,7 @@ def instructionScreen():
     size = 1
     global knotCount
     knotCount = 0
+    yScroll = 0
 
     # color, coorodinates
     #linesCords = []
@@ -233,6 +234,8 @@ def instructionScreen():
     oldRow = None
     global posX
     posX = x + spacing
+    scrollWindow = pg.Surface((x + knotMap.width * spacing, y + knotMap.length * spacing))
+    scrollWindow.fill((255, 255, 255))
 
     for run in range(0, 2):
         #knotCount = 0
@@ -258,10 +261,10 @@ def instructionScreen():
                     recWidth = recWidth * size
                     if oldRow != xRow and yRow == 0:
                         # center empty rectangle through circles
-                        pg.draw.rect(surface, (0, 0, 0), pg.Rect(posX - recWidth // 2, y - 50, recWidth, knotMap.length * spacing + 50), 1, border_radius=15)
+                        pg.draw.rect(scrollWindow, (0, 0, 0), pg.Rect(posX - recWidth // 2, y - 50, recWidth, knotMap.length * spacing + 50), 1, border_radius=15)
 
                         # draw grey line in between
-                        pg.draw.line(surface, (218, 218, 218), (posX, y - 40), (posX, knotMap.length * spacing + 90), 3 * size)
+                        pg.draw.line(scrollWindow, (218, 218, 218), (posX, y - 40), (posX, knotMap.length * spacing + 90), 3 * size)
                         oldRow = xRow
 
 
@@ -272,36 +275,36 @@ def instructionScreen():
                             lineCords.braceletKnots.append(lineCords.knotInfo(knotMap.braceletKnots[knotCount].color, posX, posY))
 
                             if direction == False:
-                                pg.draw.line(surface, lineCords.braceletKnots[i].color, (posX, posY), (posX + ((knotMap.width - 1 - xRow) * spacing) + 50, posY), 6 * size)
+                                pg.draw.line(scrollWindow, lineCords.braceletKnots[i].color, (posX, posY), (posX + ((knotMap.width - 1 - xRow) * spacing) + 50, posY), 6 * size)
                             else:
-                                pg.draw.line(surface, lineCords.braceletKnots[i].color, (posX, posY), ((posX - xRow * spacing) - 50, posY), 6 * size)
+                                pg.draw.line(scrollWindow, lineCords.braceletKnots[i].color, (posX, posY), ((posX - xRow * spacing) - 50, posY), 6 * size)
 
                             lining = False
                         elif lineCords.braceletKnots[i].color != knotMap.braceletKnots[knotCount].color:
                             i += 1
                         else:
-                            pg.draw.line(surface, lineCords.braceletKnots[i].color, (posX, posY), (lineCords.braceletKnots[i].x, lineCords.braceletKnots[i].y), 8 * size)
+                            pg.draw.line(scrollWindow, lineCords.braceletKnots[i].color, (posX, posY), (lineCords.braceletKnots[i].x, lineCords.braceletKnots[i].y), 8 * size)
                             lineCords.braceletKnots[i].x = posX
                             lineCords.braceletKnots[i].y = posY
                             lining = False
                 else:
-                    gfx.filled_circle(surface, posX, posY, 15 * size, knotMap.braceletKnots[knotCount].color)
-                    gfx.aacircle(surface, posX, posY, 15 * size, knotMap.braceletKnots[knotCount].color)
+                    gfx.filled_circle(scrollWindow, posX, posY, 15 * size, knotMap.braceletKnots[knotCount].color)
+                    gfx.aacircle(scrollWindow, posX, posY, 15 * size, knotMap.braceletKnots[knotCount].color)
 
-                    gfx.aacircle(surface, posX, posY, 16 * size, (0, 0, 0))
-                    gfx.aacircle(surface, posX, posY, 17 * size, (0, 0, 0))
+                    gfx.aacircle(scrollWindow, posX, posY, 16 * size, (0, 0, 0))
+                    gfx.aacircle(scrollWindow, posX, posY, 17 * size, (0, 0, 0))
 
                     if direction:
                         text = arrowIn.render("->", True, (255, 255, 255))
-                        surface.blit(text, (posX - 10, posY - 10))  # center text in circle
+                        scrollWindow.blit(text, (posX - 10, posY - 10))  # center text in circle
                         text = arrowOut.render("->", True, (0, 0, 0))
-                        surface.blit(text, (posX - 10, posY - 10))  # center text in circle
+                        scrollWindow.blit(text, (posX - 10, posY - 10))  # center text in circle
 
                     else:
                         text = arrowIn.render("<-", True, (255, 255, 255))
-                        surface.blit(text, (posX - 10, posY - 10))  # center text in circle
+                        scrollWindow.blit(text, (posX - 10, posY - 10))  # center text in circle
                         text = arrowOut.render("<-", True, (0, 0, 0))
-                        surface.blit(text, (posX - 10, posY - 10))  # center text in circle
+                        scrollWindow.blit(text, (posX - 10, posY - 10))  # center text in circle
 
                 '''if direction == False:
                     knotCount = knotCount + 1
@@ -311,10 +314,11 @@ def instructionScreen():
                 #knotCount = knotCount + 1
 
 
-                pg.display.update()  # show the new circle
+                #pg.display.update()  # show the new circle
                 #pg.time.delay(500)  # 1000 ms = 1 second
 
-
+    surface.blit(scrollWindow,  (0, 0), area=pg.Rect(0, yScroll, surface.get_width(), surface.get_height()))
+    pg.display.update()
 
     while editScreen == False:
         for event in pg.event.get():
@@ -325,8 +329,13 @@ def instructionScreen():
                 if event.button == 1:# left click
                     if back.isPressed(event):
                         editScreen = True
+            elif event.type == pg.MOUSEWHEEL:
+                yScroll -= event.y * 30.5  # speed
+                print("scrlling")
 
-
+        surface.fill((255, 255, 255))
+        surface.blit(scrollWindow, (0, 0), area=pg.Rect(0, yScroll, surface.get_width(), surface.get_height()))
+        pg.display.update()
         pg.display.flip()
         clock.tick(60)
 
