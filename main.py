@@ -210,8 +210,8 @@ def instructionScreen():
     text = medTxt.render("HI!", True, (0, 255, 0))
     x,y = 150, 100
 
-    spacing = 80
-    size = 2
+    spacing = 70
+    size = 1
     global knotCount
     knotCount = 0
 
@@ -272,9 +272,9 @@ def instructionScreen():
                             lineCords.braceletKnots.append(lineCords.knotInfo(knotMap.braceletKnots[knotCount].color, posX, posY))
 
                             if direction == False:
-                                pg.draw.line(surface, lineCords.braceletKnots[i].color, (posX, posY), (posX + x_range + 50, posY), 6 * size)
+                                pg.draw.line(surface, lineCords.braceletKnots[i].color, (posX, posY), (posX + ((knotMap.width - 1 - xRow) * spacing) + 50, posY), 6 * size)
                             else:
-                                pg.draw.line(surface, lineCords.braceletKnots[i].color, (posX, posY), (posX - xRow -50, posY), 6 * size)
+                                pg.draw.line(surface, lineCords.braceletKnots[i].color, (posX, posY), ((posX - xRow * spacing) - 50, posY), 6 * size)
 
                             lining = False
                         elif lineCords.braceletKnots[i].color != knotMap.braceletKnots[knotCount].color:
