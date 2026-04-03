@@ -12,14 +12,11 @@ color = (201, 201, 189)
 clock = pg.time.Clock()
 largeTxt = pg.font.Font(None, 32)
 medTxt = pg.font.Font(None, 20)
-# width = int(input("Enter the amount of string you will use: "))
-# length = int(input("Minimum length: "))
 
-# pygame.draw.rect(surface, color, pygame.Rect(100, 30, 25, 25))
 editScreen = True
-
 knotMap = None
 
+editScreenSpacing = 26
 '''class bk:
     def __init__(self, x, y, w, h,):
         self.x = x
@@ -156,7 +153,7 @@ class knotList:
             self.color = color
             self.ID = ID
 
-def editBitmap(event, bitmap, color=0):
+def editBitmap(screen, event, bitmap, color=0):
 
     if not len(bitmap.braceletKnots) == 0:
         found = False
@@ -165,16 +162,16 @@ def editBitmap(event, bitmap, color=0):
         while found == False:
             for yRow in range(bitmap.length):
                 for xRow in range(bitmap.width):
-                    testKnot = pg.Rect(xRow * 26 + bitmap.x, yRow * 26 + bitmap.y, 25, 25)
+                    testKnot = pg.Rect(xRow * editScreenSpacing + bitmap.x, yRow * editScreenSpacing + bitmap.y, 25, 25)
                     if testKnot.collidepoint(event.pos):
                         bitmap.braceletKnots[knotCount].color = color
-                        pg.draw.rect(surface, bitmap.braceletKnots[knotCount].color, (xRow * 26 + bitmap.x, yRow * 26 + bitmap.y, 25, 25))
+                        pg.draw.rect(screen, bitmap.braceletKnots[knotCount].color, (xRow * editScreenSpacing + bitmap.x, yRow * editScreenSpacing + bitmap.y, 25, 25))
                         found = True
                     elif xRow >= bitmap.width - 1:
                         found = True
                     knotCount = knotCount + 1
 
-def createBitmap(x, y, bitmap, create=False):
+def createBitmap(screen, x, y, bitmap, create=False):
     if create == True:
         bitmap.x = x
         bitmap.y = y
@@ -183,11 +180,10 @@ def createBitmap(x, y, bitmap, create=False):
         for knot in range(bitmap.width * bitmap.length):
             bitmap.braceletKnots.append(bitmap.knotInfo(knot, (92, 93, 95)))
 
-
     knotCount = 0
     for yRow in range(bitmap.length):
         for xRow in range(bitmap.width):
-            pg.draw.rect(surface, bitmap.braceletKnots[knotCount].color, (xRow * 26 + x, yRow * 26 + y, 25, 25))
+            pg.draw.rect(screen, bitmap.braceletKnots[knotCount].color, (xRow * editScreenSpacing + x, yRow * editScreenSpacing + y, 25, 25))
             knotCount = knotCount + 1
 
 def instructionScreen():
@@ -326,7 +322,7 @@ def instructionScreen():
                     if back.isPressed(event):
                         editScreen = True
             elif event.type == pg.MOUSEWHEEL:
-                yScroll -= event.y * 30.5  # speed
+                yScroll -= event.y * 30.5
                 #xS += event.x* 30.5
 
         #scrollWindow.fill((255, 255, 255))
@@ -352,6 +348,12 @@ def main():
     displayInstruction = button(surface, 900, 100, 60, 30, "Apply")
     hasCreatedBitmap = False
 
+    x = 170
+    y = 100
+    yScroll = 0
+
+    scrollWindow = pg.Surface((1, 1))
+
     while editScreen:
         for event in pg.event.get():
             if event.type == pg.QUIT:
@@ -365,7 +367,7 @@ def main():
 
             if pg.mouse.get_pressed()[0]:
                 if hasCreatedBitmap == True:
-                    editBitmap(event, knotMap, cp.color)
+                    editBitmap(scrollWindow, event, knotMap, cp.color)
 
             if event.type == pg.MOUSEBUTTONDOWN:
                 if event.button == 1:  # left click
@@ -374,7 +376,9 @@ def main():
 
                     if xStringInput.txt.isdigit() and yStringInput.txt.isdigit() and displayEditGrid.isPressed(event):
                         knotMap = knotList(int(xStringInput.txt), int(yStringInput.txt))
-                        createBitmap(50, 50, knotMap, True)
+                        scrollWindow = pg.Surface((x + knotMap.width * editScreenSpacing, y + knotMap.length * editScreenSpacing + 50))
+                        scrollWindow.fill((255, 255, 255))
+                        createBitmap(scrollWindow, x, y, knotMap, True)
                         hasCreatedBitmap = True
 
                     if displayInstruction.isPressed(event) and hasCreatedBitmap:
@@ -385,7 +389,7 @@ def main():
                     cp.update(surface)
 
             elif event.type == pg.MOUSEWHEEL:
-                pass
+                yScroll -= event.y * 30.5
             if event.type == pg.KEYDOWN:
                 pass
 
@@ -403,6 +407,8 @@ def main():
             # can access properties with
             # proper notation(ex: event.y)
         # print(input_box1.txt)
+        if hasCreatedBitmap == True:
+            surface.blit(scrollWindow, (x, 0), area=pg.Rect(0, yScroll, surface.get_width(), surface.get_height()))
         pg.display.flip()
         clock.tick(60)
 
