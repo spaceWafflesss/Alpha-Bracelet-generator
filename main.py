@@ -86,7 +86,6 @@ class ColorPicker:
         center = self.rect.left + self.rad + self.p * self.pwidth, self.rect.centery
         pg.draw.circle(screen, self.color, center, self.rect.height // 2.5)'''
 
-
 class txtInputBox:
     def __init__(self, screen, x, y, w, h, showTxt="", txt=""):
         self.txtInput = pg.Rect(x, y, w, h)
@@ -207,8 +206,8 @@ def instructionScreen():
     #pg.draw.rect(surface, (0, 0, 0), pg.Rect(400, 260, 20, 70), 1, border_radius=15)
     arrowOut = pg.font.Font(None, 30)
     arrowIn = pg.font.Font(None, 29)
-    text = medTxt.render("HI!", True, (0, 255, 0))
-    x,y = 150, 100
+    x = 170
+    y = 100
 
     spacing = 70
     size = 1
@@ -234,7 +233,7 @@ def instructionScreen():
     oldRow = None
     global posX
     posX = x + spacing
-    scrollWindow = pg.Surface((x + knotMap.width * spacing, y + knotMap.length * spacing))
+    scrollWindow = pg.Surface((x+knotMap.width * spacing, y+knotMap.length * spacing + 50))
     scrollWindow.fill((255, 255, 255))
 
     for run in range(0, 2):
@@ -316,10 +315,7 @@ def instructionScreen():
 
                 #pg.display.update()  # show the new circle
                 #pg.time.delay(500)  # 1000 ms = 1 second
-
-    surface.blit(scrollWindow,  (0, 0), area=pg.Rect(0, yScroll, surface.get_width(), surface.get_height()))
-    pg.display.update()
-
+    #xS = 0
     while editScreen == False:
         for event in pg.event.get():
             if event.type == pg.QUIT:
@@ -331,11 +327,10 @@ def instructionScreen():
                         editScreen = True
             elif event.type == pg.MOUSEWHEEL:
                 yScroll -= event.y * 30.5  # speed
-                print("scrlling")
+                #xS += event.x* 30.5
 
-        surface.fill((255, 255, 255))
-        surface.blit(scrollWindow, (0, 0), area=pg.Rect(0, yScroll, surface.get_width(), surface.get_height()))
-        pg.display.update()
+        #scrollWindow.fill((255, 255, 255))
+        surface.blit(scrollWindow, (x, 0), area=pg.Rect(0, yScroll, surface.get_width(), surface.get_height()))
         pg.display.flip()
         clock.tick(60)
 
