@@ -16,8 +16,6 @@ medTxt = pg.font.Font(None, 20)
 editScreen = True
 knotMap = None
 
-editGridSize = 25
-editScreenSpacing = editGridSize + 1
 '''class bk:
     def __init__(self, x, y, w, h,):
         self.x = x
@@ -44,8 +42,8 @@ class button:
 
 class ColorPicker:
     def __init__(self, x, y, l, size):
-        self.rect = pg.Rect(x, y, l, size)
-        self.image = pg.Surface((l, size))
+        self.rect = pg.Rect(x, y, size, l)
+        self.image = pg.Surface((size, l))
         self.image.fill((255, 255, 255))
         self.rad = size // 2
         self.color = (255, 0, 0)
@@ -54,7 +52,7 @@ class ColorPicker:
         for i in range(self.pwidth):
             color = pg.Color(0)
             color.hsla = (int(360 * i / self.pwidth), 100, 50, 100)
-            pg.draw.rect(self.image, color, (i + self.rad, size // 3, 1, size - 2 * size // 3), border_radius=5)
+            pg.draw.rect(self.image, color, (size // 3, i + self.rad, size - 2 * size // 3, 1), border_radius=5)
         self.p = 0
 
     '''def currentColor(self):
@@ -68,7 +66,7 @@ class ColorPicker:
         mouse_buttons = pg.mouse.get_pressed()
         mouse_pos = pg.mouse.get_pos()
         if mouse_buttons[0] and self.rect.collidepoint(mouse_pos):
-            self.p = (mouse_pos[0] - self.rect.left - self.rad) / self.pwidth
+            self.p = (mouse_pos[1] - self.rect.top - self.rad) / self.pwidth
             self.p = (max(0, min(self.p, 1)))
 
             getColor = pg.Color(0)
@@ -76,8 +74,8 @@ class ColorPicker:
             self.color = getColor
 
         screen.blit(self.image, self.rect)
-        center = self.rect.left + self.rad + self.p * self.pwidth, self.rect.centery
-        pg.draw.circle(screen, self.color, center, self.rect.height // 2.5)
+        center = self.rect.centerx, self.rect.top + self.rad + self.p * self.pwidth
+        pg.draw.circle(screen, self.color, center, self.rect.width // 2.5)
 
     '''def draw(self, screen):
         screen.blit(self.image, self.rect)
@@ -154,7 +152,8 @@ class knotList:
             self.color = color
             self.ID = ID
 
-def editBitmap(screen, pos, bitmap, color=0):
+def editBitmap(screen, pos, bitmap, size, color=0):
+    spacing = size - 1
     if not len(bitmap.braceletKnots) == 0:
         found = False
 
@@ -162,16 +161,17 @@ def editBitmap(screen, pos, bitmap, color=0):
         while found == False:
             for yRow in range(bitmap.length):
                 for xRow in range(bitmap.width):
-                    testKnot = pg.Rect(xRow * editScreenSpacing + bitmap.x, yRow * editScreenSpacing + bitmap.y, editGridSize, editGridSize)
+                    testKnot = pg.Rect(xRow * spacing + bitmap.x, yRow * spacing + bitmap.y, size, size)
                     if testKnot.collidepoint(pos):
                         bitmap.braceletKnots[knotCount].color = color
-                        pg.draw.rect(screen, bitmap.braceletKnots[knotCount].color, (xRow * editScreenSpacing + bitmap.x, yRow * editScreenSpacing + bitmap.y, editGridSize, editGridSize))
+                        pg.draw.rect(screen, bitmap.braceletKnots[knotCount].color, (xRow * spacing + bitmap.x, yRow * spacing + bitmap.y, size, size))
                         found = True
                     elif xRow >= bitmap.width - 1:
                         found = True
                     knotCount = knotCount + 1
 
-def createBitmap(screen, x, y, bitmap, create=False):
+def createBitmap(screen, x, y, bitmap, size, create=False):
+    spacing = size - 1
     if create == True:
         bitmap.x = x
         bitmap.y = y
@@ -183,7 +183,7 @@ def createBitmap(screen, x, y, bitmap, create=False):
     knotCount = 0
     for yRow in range(bitmap.length):
         for xRow in range(bitmap.width):
-            pg.draw.rect(screen, bitmap.braceletKnots[knotCount].color, (xRow * editScreenSpacing + x, yRow * editScreenSpacing + y, editGridSize, editGridSize))
+            pg.draw.rect(screen, bitmap.braceletKnots[knotCount].color, (xRow * spacing + x, yRow * spacing + y, size, size))
             knotCount = knotCount + 1
 
 def instructionScreen():
@@ -340,16 +340,19 @@ def main():
     xStringInput.update()
     yStringInput.update()
 
-    cp = ColorPicker(500, 30, 200, 40)
+    cp = ColorPicker(900, 450, 200, 40)
     # drawBitmap(5, 5)
     surface.fill((255, 255, 255))
+
+    editGridSize = 25
+    editScreenSpacing = editGridSize - 1
 
     displayEditGrid = button(surface, 900, 300, 60, 30, "Load")
     displayInstruction = button(surface, 900, 100, 60, 30, "Apply")
     hasCreatedBitmap = False
 
-    x = 2
-    y = 100
+    #x = 2
+    #y = 100
     yScroll = 0
     scrollWindow = pg.Surface((1, 1))
 
@@ -367,22 +370,25 @@ def main():
             if pg.mouse.get_pressed()[0]:
                 if hasCreatedBitmap == True:
                     xScrollWindow, y = pg.mouse.get_pos()
-                    editBitmap(scrollWindow, (xScrollWindow - x, y + yScroll), knotMap, cp.color)
+                    editBitmap(scrollWindow, (xScrollWindow - x, y + yScroll), knotMap, editGridSize, cp.color)
 
             if event.type == pg.MOUSEBUTTONDOWN:
                 if event.button == 1:  # left click
-
                     cp.update(surface)
 
                     if xStringInput.txt.isdigit() and yStringInput.txt.isdigit() and displayEditGrid.isPressed(event):
+                        x = 2
+                        y = 100
+                        maxKnots = 30
                         knotMap = knotList(int(xStringInput.txt), int(yStringInput.txt))
-                        #editScreenSpacing = max(10, min(40, surface.get_width() // knotMap.width))
+                        if knotMap.width > maxKnots:
+                            editGridSize = editGridSize - (knotMap.width - maxKnots)
+                            #editGridSize = editGridSize - (knotMap.width - maxKnots) * -2
+                            #editScreenSpacing = max(10, min(40, surface.get_width() // knotMap.width))
+
                         scrollWindow = pg.Surface((knotMap.width * editScreenSpacing, y + knotMap.length * editScreenSpacing + 50))
                         scrollWindow.fill((255, 255, 255))
-
-
-                        createBitmap(scrollWindow, x, y, knotMap, True)
-
+                        createBitmap(scrollWindow, x, y, knotMap, editGridSize, True)
                         x = (surface.get_width() - scrollWindow.get_width()) // 2
 
                         hasCreatedBitmap = True
@@ -413,6 +419,7 @@ def main():
         # print(input_box1.txt)
         if hasCreatedBitmap == True:
             surface.blit(scrollWindow, (x, 0), area=pg.Rect(0, yScroll, surface.get_width(), surface.get_height()))
+
         pg.display.flip()
         clock.tick(60)
 
