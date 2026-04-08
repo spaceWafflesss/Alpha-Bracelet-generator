@@ -153,7 +153,7 @@ class knotList:
             self.ID = ID
 
 def editBitmap(screen, pos, bitmap, size, color=0):
-    spacing = size - 1
+    spacing = size + 1
     if not len(bitmap.braceletKnots) == 0:
         found = False
 
@@ -171,7 +171,7 @@ def editBitmap(screen, pos, bitmap, size, color=0):
                     knotCount = knotCount + 1
 
 def createBitmap(screen, x, y, bitmap, size, create=False):
-    spacing = size - 1
+    spacing = size + 1
     if create == True:
         bitmap.x = x
         bitmap.y = y
@@ -345,12 +345,11 @@ def main():
     surface.fill((255, 255, 255))
 
     editGridSize = 25
-    editScreenSpacing = editGridSize - 1
 
     displayEditGrid = button(surface, 900, 300, 60, 30, "Load")
     displayInstruction = button(surface, 900, 100, 60, 30, "Apply")
     hasCreatedBitmap = False
-
+    firstGridUse = True
     #x = 2
     #y = 100
     yScroll = 0
@@ -380,18 +379,32 @@ def main():
                         x = 2
                         y = 100
                         maxKnots = 30
-                        knotMap = knotList(int(xStringInput.txt), int(yStringInput.txt))
-                        if knotMap.width > maxKnots:
-                            editGridSize = editGridSize - (knotMap.width - maxKnots)
-                            #editGridSize = editGridSize - (knotMap.width - maxKnots) * -2
-                            #editScreenSpacing = max(10, min(40, surface.get_width() // knotMap.width))
+                        editScreenSpacing = 25
+                        editGridSize =  25
 
-                        scrollWindow = pg.Surface((knotMap.width * editScreenSpacing, y + knotMap.length * editScreenSpacing + 50))
+                        if firstGridUse == False:
+                            scrollWindow.fill((255, 255, 255))
+                            x = (surface.get_width() - gridWidth) // 2
+                            surface.blit(scrollWindow, (x, 0), area=pg.Rect(0, yScroll, surface.get_width(), surface.get_height()))
+                            x = 2
+
+                        pg.display.flip()
+
+                        knotMap = knotList(int(xStringInput.txt), int(yStringInput.txt))
+
+                        if knotMap.width > maxKnots:
+                            editGridSize = ((maxKnots * editGridSize + (maxKnots - 1)) - (knotMap.width - 1)) // knotMap.width
+                            #editGridSize = int(editGridSize * (maxKnots / knotMap.width))
+
+
+                        gridWidth = knotMap.width * editGridSize + (knotMap.width - 1)
+                        scrollWindow = pg.Surface((gridWidth, y + knotMap.length * editScreenSpacing + 100))
                         scrollWindow.fill((255, 255, 255))
                         createBitmap(scrollWindow, x, y, knotMap, editGridSize, True)
-                        x = (surface.get_width() - scrollWindow.get_width()) // 2
+                        x = (surface.get_width() - gridWidth) // 2
 
                         hasCreatedBitmap = True
+                        firstGridUse = False
 
                     if displayInstruction.isPressed(event) and hasCreatedBitmap:
                         editScreen = False
