@@ -201,26 +201,26 @@ def instructionScreen():
     pg.draw.circle(surface, (255, 38, 0), (900, 480), 10)
     #pg.draw.rect(surface, (0, 0, 0), pg.Rect(400, 260, 20, 70), 1, border_radius=15)
     arrowOut = pg.font.Font(None, 30)
-    arrowIn = pg.font.Font(None, 29)
+    arrowIn = pg.font.Font(None, 30)
     x = 170
     y = 100
 
 
     size = 18
-    spacing = size + 50
+    #spacing = size + 50
+
     global knotCount
     knotCount = 0
     yScroll = 0
     enterStringOffset = 60
 
-    gridWidth = knotMap.width * spacing + (knotMap.width - 1) + enterStringOffset
-    x = (surface.get_width() - gridWidth) // 2
-    print("x inside: " + str(x))
-    print("gridwidth: " + str(gridWidth))
-
     maxKnots = 8
     if knotMap.width > maxKnots:
-        size = ((maxKnots * size + (maxKnots - 1)) - (knotMap.width - 1)) // knotMap.width
+        size = ((maxKnots * size + (maxKnots - 1)) + (knotMap.width - 1)) // knotMap.width
+
+    spacing = (size*3)
+    gridWidth = knotMap.width * spacing + (knotMap.width - 1) + enterStringOffset
+    x = (surface.get_width() - gridWidth) // 2
 
     class colorPoints:
         def __init__(self):
@@ -239,7 +239,7 @@ def instructionScreen():
     posX = x + spacing
     #scrollWindow = pg.Surface((x+knotMap.width * spacing, y+knotMap.length * spacing + 50))
     scrollWindow = pg.Surface((gridWidth, y + knotMap.length * spacing + 100))
-    scrollWindow.fill((255, 0, 255))
+    scrollWindow.fill((255, 255, 255))
 
     for run in range(0, 2):
         #knotCount = 0
@@ -261,45 +261,48 @@ def instructionScreen():
                 knotCount = yRow * knotMap.width + xRow
 
                 if run == 0:
-                    recWidth = 12
-                    recWidth = recWidth * size
+                    dynamicSize = round(size * 0.5)
                     if oldRow != xRow and yRow == 0:
                         # center empty rectangle through circles
-                        pg.draw.rect(scrollWindow, (0, 0, 0), pg.Rect(posX - recWidth // 2, y - 50, recWidth, knotMap.length * spacing + 50), 1, border_radius=15)
+                        pg.draw.rect(scrollWindow, (0, 0, 0),  pg.Rect(posX - dynamicSize*-1.5 // 2, y - 50, dynamicSize*-1.5, knotMap.length * spacing + 40), 1, border_radius=15)
 
                         # draw grey line in between
-                        pg.draw.line(scrollWindow, (218, 218, 218), (posX, y - 40), (posX, knotMap.length * spacing + 90), 3 * size)
+                        pg.draw.rect(scrollWindow, (218, 218, 218), pg.Rect(posX - dynamicSize*-0.4 // 2, y - 40, dynamicSize*-0.4, knotMap.length * spacing + 20), border_radius=15)
                         oldRow = xRow
 
 
                     #this while draws the lines  between the  knots that shows where the strings are suppose to go next
                     lining = True
                     i = 0
+
                     while lining:
+                        # if at the start or finish of the width draw a line
+                        # going into the pattern to show that a new string is being added
                         if len(lineCords.braceletKnots) == 0 or i == len(lineCords.braceletKnots):
                             lineCords.braceletKnots.append(lineCords.knotInfo(knotMap.braceletKnots[knotCount].color, posX, posY))
 
                             if direction == False:
-                                pg.draw.line(scrollWindow, lineCords.braceletKnots[i].color, (posX, posY), (posX + ((knotMap.width - 1 - xRow) * spacing) + 50, posY), size)
+                                pg.draw.line(scrollWindow, lineCords.braceletKnots[i].color, (posX, posY), (posX + ((knotMap.width - 1 - xRow) * spacing) + 50, posY), dynamicSize)
                             else:
-                                pg.draw.line(scrollWindow, lineCords.braceletKnots[i].color, (posX, posY), ((posX - xRow * spacing) - 50, posY),  size)
+                                pg.draw.line(scrollWindow, lineCords.braceletKnots[i].color, (posX, posY), ((posX - xRow * spacing) - 50, posY),  dynamicSize)
 
                             lining = False
                         elif lineCords.braceletKnots[i].color != knotMap.braceletKnots[knotCount].color:
                             i += 1
                         else:
-                            pg.draw.line(scrollWindow, lineCords.braceletKnots[i].color, (posX, posY), (lineCords.braceletKnots[i].x, lineCords.braceletKnots[i].y), size)
+                            pg.draw.line(scrollWindow, lineCords.braceletKnots[i].color, (posX, posY), (lineCords.braceletKnots[i].x, lineCords.braceletKnots[i].y), dynamicSize)
                             lineCords.braceletKnots[i].x = posX
                             lineCords.braceletKnots[i].y = posY
                             lining = False
                 else:
+                    print("size: " + str(size))
                     gfx.filled_circle(scrollWindow, posX, posY,  size, knotMap.braceletKnots[knotCount].color)
                     gfx.aacircle(scrollWindow, posX, posY,  size, knotMap.braceletKnots[knotCount].color)
 
                     gfx.aacircle(scrollWindow, posX, posY,  size, (0, 0, 0))
                     gfx.aacircle(scrollWindow, posX, posY,  size, (0, 0, 0))
 
-                    if direction:
+                    '''if direction:
                         text = arrowIn.render("->", True, (255, 255, 255))
                         scrollWindow.blit(text, (posX - 10, posY - 10))  # center text in circle
                         text = arrowOut.render("->", True, (0, 0, 0))
@@ -309,7 +312,7 @@ def instructionScreen():
                         text = arrowIn.render("<-", True, (255, 255, 255))
                         scrollWindow.blit(text, (posX - 10, posY - 10))  # center text in circle
                         text = arrowOut.render("<-", True, (0, 0, 0))
-                        scrollWindow.blit(text, (posX - 10, posY - 10))  # center text in circle
+                        scrollWindow.blit(text, (posX - 10, posY - 10))  # center text in circle'''
 
                 '''if direction == False:
                     knotCount = knotCount + 1
