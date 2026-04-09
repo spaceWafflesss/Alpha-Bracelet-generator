@@ -205,14 +205,22 @@ def instructionScreen():
     x = 170
     y = 100
 
-    spacing = 70
-    size = 1
+
+    size = 18
+    spacing = size + 50
     global knotCount
     knotCount = 0
     yScroll = 0
+    enterStringOffset = 60
 
-    # color, coorodinates
-    #linesCords = []
+    gridWidth = knotMap.width * spacing + (knotMap.width - 1) + enterStringOffset
+    x = (surface.get_width() - gridWidth) // 2
+    print("x inside: " + str(x))
+    print("gridwidth: " + str(gridWidth))
+
+    maxKnots = 8
+    if knotMap.width > maxKnots:
+        size = ((maxKnots * size + (maxKnots - 1)) - (knotMap.width - 1)) // knotMap.width
 
     class colorPoints:
         def __init__(self):
@@ -229,8 +237,9 @@ def instructionScreen():
     oldRow = None
     global posX
     posX = x + spacing
-    scrollWindow = pg.Surface((x+knotMap.width * spacing, y+knotMap.length * spacing + 50))
-    scrollWindow.fill((255, 255, 255))
+    #scrollWindow = pg.Surface((x+knotMap.width * spacing, y+knotMap.length * spacing + 50))
+    scrollWindow = pg.Surface((gridWidth, y + knotMap.length * spacing + 100))
+    scrollWindow.fill((255, 0, 255))
 
     for run in range(0, 2):
         #knotCount = 0
@@ -248,7 +257,7 @@ def instructionScreen():
                 knotCount = knotCount + knotMap.width
 
             for xRow in x_range:
-                posX = x + xRow * spacing
+                posX = enterStringOffset + xRow * spacing
                 knotCount = yRow * knotMap.width + xRow
 
                 if run == 0:
@@ -263,6 +272,7 @@ def instructionScreen():
                         oldRow = xRow
 
 
+                    #this while draws the lines  between the  knots that shows where the strings are suppose to go next
                     lining = True
                     i = 0
                     while lining:
@@ -270,24 +280,24 @@ def instructionScreen():
                             lineCords.braceletKnots.append(lineCords.knotInfo(knotMap.braceletKnots[knotCount].color, posX, posY))
 
                             if direction == False:
-                                pg.draw.line(scrollWindow, lineCords.braceletKnots[i].color, (posX, posY), (posX + ((knotMap.width - 1 - xRow) * spacing) + 50, posY), 6 * size)
+                                pg.draw.line(scrollWindow, lineCords.braceletKnots[i].color, (posX, posY), (posX + ((knotMap.width - 1 - xRow) * spacing) + 50, posY), size)
                             else:
-                                pg.draw.line(scrollWindow, lineCords.braceletKnots[i].color, (posX, posY), ((posX - xRow * spacing) - 50, posY), 6 * size)
+                                pg.draw.line(scrollWindow, lineCords.braceletKnots[i].color, (posX, posY), ((posX - xRow * spacing) - 50, posY),  size)
 
                             lining = False
                         elif lineCords.braceletKnots[i].color != knotMap.braceletKnots[knotCount].color:
                             i += 1
                         else:
-                            pg.draw.line(scrollWindow, lineCords.braceletKnots[i].color, (posX, posY), (lineCords.braceletKnots[i].x, lineCords.braceletKnots[i].y), 8 * size)
+                            pg.draw.line(scrollWindow, lineCords.braceletKnots[i].color, (posX, posY), (lineCords.braceletKnots[i].x, lineCords.braceletKnots[i].y), size)
                             lineCords.braceletKnots[i].x = posX
                             lineCords.braceletKnots[i].y = posY
                             lining = False
                 else:
-                    gfx.filled_circle(scrollWindow, posX, posY, 15 * size, knotMap.braceletKnots[knotCount].color)
-                    gfx.aacircle(scrollWindow, posX, posY, 15 * size, knotMap.braceletKnots[knotCount].color)
+                    gfx.filled_circle(scrollWindow, posX, posY,  size, knotMap.braceletKnots[knotCount].color)
+                    gfx.aacircle(scrollWindow, posX, posY,  size, knotMap.braceletKnots[knotCount].color)
 
-                    gfx.aacircle(scrollWindow, posX, posY, 16 * size, (0, 0, 0))
-                    gfx.aacircle(scrollWindow, posX, posY, 17 * size, (0, 0, 0))
+                    gfx.aacircle(scrollWindow, posX, posY,  size, (0, 0, 0))
+                    gfx.aacircle(scrollWindow, posX, posY,  size, (0, 0, 0))
 
                     if direction:
                         text = arrowIn.render("->", True, (255, 255, 255))
