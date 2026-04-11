@@ -9,6 +9,7 @@ surface = pg.display.set_mode((0, 0), pg.RESIZABLE)  # window
 background = (255, 255, 255)
 surface.fill(background)
 color = (201, 201, 189)
+
 clock = pg.time.Clock()
 largeTxt = pg.font.Font(None, 32)
 medTxt = pg.font.Font(None, 20)
@@ -178,7 +179,7 @@ def createBitmap(screen, x, y, bitmap, size, create=False):
         bitmap.braceletKnots.clear()
 
         for knot in range(bitmap.width * bitmap.length):
-            bitmap.braceletKnots.append(bitmap.knotInfo(knot, (92, 93, 95)))
+            bitmap.braceletKnots.append(bitmap.knotInfo(knot, (56, 56, 56)))
 
     knotCount = 0
     for yRow in range(bitmap.length):
@@ -198,10 +199,7 @@ def instructionScreen():
     else:
         print("ok6")
 
-    pg.draw.circle(surface, (255, 38, 0), (900, 480), 10)
-    #pg.draw.rect(surface, (0, 0, 0), pg.Rect(400, 260, 20, 70), 1, border_radius=15)
-    arrowOut = pg.font.Font(None, 30)
-    arrowIn = pg.font.Font(None, 30)
+
     x = 170
     y = 100
 
@@ -241,6 +239,14 @@ def instructionScreen():
     scrollWindow = pg.Surface((gridWidth, y + knotMap.length * spacing + 100))
     scrollWindow.fill((255, 255, 255))
 
+    #info for dynamically loaded pollygon arrow:
+    w = size * 0.9  # total width
+    h = size * 0.4  # total height
+
+    head = w * 0.4
+    body = w - head
+
+
     for run in range(0, 2):
         #knotCount = 0
 
@@ -267,7 +273,7 @@ def instructionScreen():
                         pg.draw.rect(scrollWindow, (0, 0, 0),  pg.Rect(posX - dynamicSize*-1.5 // 2, y - 50, dynamicSize*-1.5, knotMap.length * spacing + 40), 1, border_radius=15)
 
                         # draw grey line in between
-                        pg.draw.rect(scrollWindow, (218, 218, 218), pg.Rect(posX - dynamicSize*-0.4 // 2, y - 40, dynamicSize*-0.4, knotMap.length * spacing + 20), border_radius=15)
+                        pg.draw.rect(scrollWindow, (214, 214, 214), pg.Rect(posX - dynamicSize*-0.4 // 2, y - 40, dynamicSize*-0.4, knotMap.length * spacing + 20), border_radius=15)
                         oldRow = xRow
 
 
@@ -282,37 +288,73 @@ def instructionScreen():
                             lineCords.braceletKnots.append(lineCords.knotInfo(knotMap.braceletKnots[knotCount].color, posX, posY))
 
                             if direction == False:
-                                pg.draw.line(scrollWindow, lineCords.braceletKnots[i].color, (posX, posY), (posX + ((knotMap.width - 1 - xRow) * spacing) + 50, posY), dynamicSize)
+                                pg.draw.rect(scrollWindow, (0, 0, 0),(min(posX, posX + ((knotMap.width - 1 - xRow) * spacing) + 50) + 1, (posY - dynamicSize // 2) - 1, abs(posX + ((knotMap.width - 1 - xRow) * spacing) + 50 - posX), dynamicSize+2), border_radius=15)
+                                pg.draw.rect(scrollWindow, lineCords.braceletKnots[i].color,(min(posX, posX + ((knotMap.width - 1 - xRow) * spacing) + 50), (posY - dynamicSize // 2), abs(posX + ((knotMap.width - 1 - xRow) * spacing) + 50 - posX), dynamicSize), border_radius=15)
                             else:
-                                pg.draw.line(scrollWindow, lineCords.braceletKnots[i].color, (posX, posY), ((posX - xRow * spacing) - 50, posY),  dynamicSize)
-
+                                pg.draw.rect(scrollWindow, (0, 0, 0), (min(posX, posX - (xRow * spacing) - 50) - 1, (posY - dynamicSize // 2) - 1, abs((posX - (xRow * spacing) - 50) - posX), dynamicSize+2), border_radius=15)
+                                pg.draw.rect(scrollWindow, lineCords.braceletKnots[i].color,(min(posX, posX - (xRow * spacing) - 50), (posY - dynamicSize // 2),abs((posX - (xRow * spacing) - 50) - posX), dynamicSize), border_radius=15)
                             lining = False
+
                         elif lineCords.braceletKnots[i].color != knotMap.braceletKnots[knotCount].color:
                             i += 1
                         else:
-                            pg.draw.line(scrollWindow, lineCords.braceletKnots[i].color, (posX, posY), (lineCords.braceletKnots[i].x, lineCords.braceletKnots[i].y), dynamicSize)
+                            pg.draw.line(scrollWindow, (0, 0, 0), (posX, posY+1), (lineCords.braceletKnots[i].x, lineCords.braceletKnots[i].y+1), dynamicSize+4)
+                            pg.draw.line(scrollWindow, lineCords.braceletKnots[i].color, (posX, posY),(lineCords.braceletKnots[i].x, lineCords.braceletKnots[i].y), dynamicSize)
                             lineCords.braceletKnots[i].x = posX
                             lineCords.braceletKnots[i].y = posY
                             lining = False
                 else:
-                    print("size: " + str(size))
+                    gfx.filled_circle(scrollWindow, posX, posY, size + 2, (0, 0, 0))  # border
                     gfx.filled_circle(scrollWindow, posX, posY,  size, knotMap.braceletKnots[knotCount].color)
-                    gfx.aacircle(scrollWindow, posX, posY,  size, knotMap.braceletKnots[knotCount].color)
 
-                    gfx.aacircle(scrollWindow, posX, posY,  size, (0, 0, 0))
-                    gfx.aacircle(scrollWindow, posX, posY,  size, (0, 0, 0))
+                    left = posX - w / 2
+                    right = posX + w / 2
+                    top = posY - h / 2
+                    bottom = posY + h / 2
+                    mid = posY
 
-                    '''if direction:
-                        text = arrowIn.render("->", True, (255, 255, 255))
+                    if direction: #facing right ->
+                        '''text = arrowIn.render("->", True, (255, 255, 255))
                         scrollWindow.blit(text, (posX - 10, posY - 10))  # center text in circle
                         text = arrowOut.render("->", True, (0, 0, 0))
-                        scrollWindow.blit(text, (posX - 10, posY - 10))  # center text in circle
+                        scrollWindow.blit(text, (posX - 10, posY - 10))  # center text in circle'''
 
-                    else:
-                        text = arrowIn.render("<-", True, (255, 255, 255))
+                        points = [
+                            (left, posY - h * 0.25),
+                            (left + body, posY - h * 0.25),
+                            (left + body, top),
+                            (right, mid),
+                            (left + body, bottom),
+                            (left + body, posY + h * 0.25),
+                            (left, posY + h * 0.25),
+                        ]
+
+                    else: #facing left <-
+                        '''text = arrowIn.render("<-", True, (255, 255, 255))
                         scrollWindow.blit(text, (posX - 10, posY - 10))  # center text in circle
                         text = arrowOut.render("<-", True, (0, 0, 0))
                         scrollWindow.blit(text, (posX - 10, posY - 10))  # center text in circle'''
+                        points = [
+                            (right, posY - h * 0.25),
+                            (right - body, posY - h * 0.25),
+                            (right - body, top),
+                            (left, mid),
+                            (right - body, bottom),
+                            (right - body, posY + h * 0.25),
+                            (right, posY + h * 0.25),
+                        ]
+
+                    r, g, b = knotMap.braceletKnots[knotCount].color[:3]
+                    if r // 2 <= 127 and g // 2 <= 127 and b // 2 <= 127:
+                        inside = (255, 255, 255)
+                        outside = (0, 0, 0)
+                    else:
+                        inside = (0, 0, 0)
+                        outside = (255, 255, 255)
+
+                    pg.draw.polygon(scrollWindow, inside, points)
+                    # border
+                    pg.draw.polygon(scrollWindow, outside, points, 1)
 
                 '''if direction == False:
                     knotCount = knotCount + 1
@@ -323,6 +365,7 @@ def instructionScreen():
 
 
                 #pg.display.update()  # show the new circle
+
                 #pg.time.delay(500)  # 1000 ms = 1 second
     #xS = 0
     while editScreen == False:
@@ -407,8 +450,6 @@ def main():
 
                         if knotMap.width > maxKnots:
                             editGridSize = ((maxKnots * editGridSize + (maxKnots - 1)) - (knotMap.width - 1)) // knotMap.width
-                            #editGridSize = int(editGridSize * (maxKnots / knotMap.width))
-
 
                         gridWidth = knotMap.width * editGridSize + (knotMap.width - 1)
                         scrollWindow = pg.Surface((gridWidth, y + knotMap.length * editScreenSpacing + 100))
@@ -448,7 +489,6 @@ def main():
 
         pg.display.flip()
         clock.tick(60)
-
 
 while True:
     if  editScreen:
