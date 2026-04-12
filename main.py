@@ -203,7 +203,6 @@ def instructionScreen():
     x = 170
     y = 100
 
-
     size = 18
     #spacing = size + 50
 
@@ -401,6 +400,8 @@ def main():
     surface.fill((255, 255, 255))
 
     editGridSize = 25
+    maxKnots = 30
+    editScreenSpacing = 25
 
     displayEditGrid = button(surface, 900, 300, 60, 30, "Load")
     displayInstruction = button(surface, 900, 100, 60, 30, "Apply")
@@ -410,6 +411,23 @@ def main():
     #y = 100
     yScroll = 0
     scrollWindow = pg.Surface((1, 1))
+
+    if not knotMap is None:
+        y = 100
+        x = 2
+        if knotMap.width > maxKnots:
+            editGridSize = ((maxKnots * editGridSize + (maxKnots - 1)) - (knotMap.width - 1)) // knotMap.width
+
+        gridWidth = knotMap.width * editGridSize + (knotMap.width - 1)
+        scrollWindow = pg.Surface((gridWidth, y + knotMap.length * editScreenSpacing + 100))
+        scrollWindow.fill((255, 255, 255))
+
+        createBitmap(scrollWindow, x, y, knotMap, editGridSize, False)
+        x = (surface.get_width() - gridWidth) // 2
+
+        hasCreatedBitmap = True
+        firstGridUse = False
+
 
     while editScreen:
         for event in pg.event.get():
@@ -434,8 +452,6 @@ def main():
                     if xStringInput.txt.isdigit() and yStringInput.txt.isdigit() and displayEditGrid.isPressed(event):
                         x = 2
                         y = 100
-                        maxKnots = 30
-                        editScreenSpacing = 25
                         editGridSize =  25
 
                         if firstGridUse == False:
@@ -443,8 +459,7 @@ def main():
                             x = (surface.get_width() - gridWidth) // 2
                             surface.blit(scrollWindow, (x, 0), area=pg.Rect(0, yScroll, surface.get_width(), surface.get_height()))
                             x = 2
-
-                        pg.display.flip()
+                            pg.display.flip()
 
                         knotMap = knotList(int(xStringInput.txt), int(yStringInput.txt))
 
@@ -484,7 +499,7 @@ def main():
 
             # xStringInput.update()
         # print(input_box1.txt)
-        if hasCreatedBitmap == True:
+        if not knotMap is None:
             surface.blit(scrollWindow, (x, 0), area=pg.Rect(0, yScroll, surface.get_width(), surface.get_height()))
 
         pg.display.flip()
