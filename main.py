@@ -9,6 +9,7 @@ surface = pg.display.set_mode((0, 0), pg.RESIZABLE)  # window
 background = (255, 255, 255)
 surface.fill(background)
 color = (201, 201, 189)
+defaultColor = (56, 56, 56)
 
 clock = pg.time.Clock()
 largeTxt = pg.font.Font(None, 32)
@@ -16,11 +17,6 @@ medTxt = pg.font.Font(None, 20)
 
 editScreen = True
 knotMap = None
-
-'''class bk:
-    def __init__(self, x, y, w, h,):
-        self.x = x
-        self.y = y'''
 
 class button:
     def __init__(self, screen, x, y, w, h, showTxt=""):
@@ -173,13 +169,14 @@ def editBitmap(screen, pos, bitmap, size, color=0):
 
 def createBitmap(screen, x, y, bitmap, size, create=False):
     spacing = size + 1
+
     if create == True:
         bitmap.x = x
         bitmap.y = y
         bitmap.braceletKnots.clear()
 
         for knot in range(bitmap.width * bitmap.length):
-            bitmap.braceletKnots.append(bitmap.knotInfo(knot, (56, 56, 56)))
+            bitmap.braceletKnots.append(bitmap.knotInfo(knot, defaultColor))
 
     knotCount = 0
     for yRow in range(bitmap.length):
@@ -276,6 +273,31 @@ def instructionScreen():
                         oldRow = xRow
 
 
+                    if direction:  # ->
+                        if xRow == knotMap.width - 1:
+                            pg.draw.line(scrollWindow, (199, 199, 199), (posX, posY),
+                                         (posX + ((knotMap.width - 1 - xRow) * spacing) + 50, posY), dynamicSize - 1)
+                        elif xRow == 0:
+                            pg.draw.line(scrollWindow, (199, 199, 199), (posX, posY),
+                                         ((posX - xRow * spacing) - 50, posY), dynamicSize)
+                        
+                    else:  # <-
+                        if xRow == 0:
+                            pg.draw.line(scrollWindow, (199, 199, 199), (posX, posY),
+                                         ((posX - xRow * spacing) - 50, posY), dynamicSize)
+
+                        elif xRow == knotMap.width - 1:
+                            pg.draw.line(scrollWindow, (199, 199, 199), (posX, posY),
+                                         (posX + ((knotMap.width - 1 - xRow) * spacing) + 50, posY), dynamicSize - 1)
+                        
+
+                    '''if xRow == knotMap.width: # ->
+                        pg.draw.line(scrollWindow, (199, 199, 199), (posX, posY),((posX - xRow * spacing) - 50, posY), dynamicSize)
+                        print("ok8")
+                        pass
+                    elif xRow == 0: # <-
+                        #pg.draw.line(scrollWindow, (199, 199, 199), (posX, posY),(posX + ((knotMap.width - 1 - xRow) * spacing) + 50, posY), dynamicSize-1)
+                        pass'''
                     #this while draws the lines  between the  knots that shows where the strings are suppose to go next
                     lining = True
                     i = 0
@@ -286,7 +308,7 @@ def instructionScreen():
                         if len(lineCords.braceletKnots) == 0 or i == len(lineCords.braceletKnots):
                             lineCords.braceletKnots.append(lineCords.knotInfo(knotMap.braceletKnots[knotCount].color, posX, posY))
 
-                            if direction == False:
+                            if direction == False: # <-
                                 pg.draw.rect(scrollWindow, (0, 0, 0),(min(posX, posX + ((knotMap.width - 1 - xRow) * spacing) + 50) + 1, (posY - dynamicSize // 2) - 1, abs(posX + ((knotMap.width - 1 - xRow) * spacing) + 50 - posX), dynamicSize+2), border_radius=15)
                                 pg.draw.rect(scrollWindow, lineCords.braceletKnots[i].color,(min(posX, posX + ((knotMap.width - 1 - xRow) * spacing) + 50), (posY - dynamicSize // 2), abs(posX + ((knotMap.width - 1 - xRow) * spacing) + 50 - posX), dynamicSize), border_radius=15)
                             else:
@@ -296,7 +318,7 @@ def instructionScreen():
 
                         elif lineCords.braceletKnots[i].color != knotMap.braceletKnots[knotCount].color:
                             i += 1
-                        else:
+                        else:  # ->
                             pg.draw.line(scrollWindow, (0, 0, 0), (posX, posY+1), (lineCords.braceletKnots[i].x, lineCords.braceletKnots[i].y+1), dynamicSize+4)
                             pg.draw.line(scrollWindow, lineCords.braceletKnots[i].color, (posX, posY),(lineCords.braceletKnots[i].x, lineCords.braceletKnots[i].y), dynamicSize)
                             lineCords.braceletKnots[i].x = posX
@@ -405,6 +427,7 @@ def main():
 
     displayEditGrid = button(surface, 900, 300, 60, 30, "Load")
     displayInstruction = button(surface, 900, 100, 60, 30, "Apply")
+    clearGrid = button(surface, 900, 160, 60, 30, "Clear")
     hasCreatedBitmap = False
     firstGridUse = True
     #x = 2
@@ -458,9 +481,10 @@ def main():
                             scrollWindow.fill((255, 255, 255))
                             x = (surface.get_width() - gridWidth) // 2
                             surface.blit(scrollWindow, (x, 0), area=pg.Rect(0, yScroll, surface.get_width(), surface.get_height()))
-                            x = 2
-                            pg.display.flip()
+                            x  =  2
 
+                        #if not knotMap is None:
+                            #editBitmap()
                         knotMap = knotList(int(xStringInput.txt), int(yStringInput.txt))
 
                         if knotMap.width > maxKnots:
@@ -477,6 +501,15 @@ def main():
 
                     if displayInstruction.isPressed(event) and hasCreatedBitmap:
                         editScreen = False
+
+                    if clearGrid.isPressed(event) and hasCreatedBitmap: #if there is  already  a grid loop through the  color and set everything to grey
+                        y = 100
+                        x = 2
+                        for knot in knotMap.braceletKnots:
+                            knot.color = defaultColor
+                        createBitmap(scrollWindow, x, y, knotMap, editGridSize, False)
+                        x = (surface.get_width() - gridWidth) // 2
+
 
                 elif event.button == 3:  # right click
                     cp.color = surface.get_at(pg.mouse.get_pos())
