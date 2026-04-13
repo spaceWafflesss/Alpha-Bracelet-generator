@@ -145,9 +145,8 @@ class knotList:
         self.y = 0
 
     class knotInfo:
-        def __init__(self, ID, color):
+        def __init__(self, color):
             self.color = color
-            self.ID = ID
 
 def editBitmap(screen, pos, bitmap, size, color=0):
     spacing = size + 1
@@ -176,7 +175,7 @@ def createBitmap(screen, x, y, bitmap, size, create=False):
         bitmap.braceletKnots.clear()
 
         for knot in range(bitmap.width * bitmap.length):
-            bitmap.braceletKnots.append(bitmap.knotInfo(knot, defaultColor))
+            bitmap.braceletKnots.append(bitmap.knotInfo(defaultColor))
 
     knotCount = 0
     for yRow in range(bitmap.length):
@@ -187,6 +186,8 @@ def createBitmap(screen, x, y, bitmap, size, create=False):
 def instructionScreen():
     surface.fill((255, 255, 255))
     back = button(surface, 30, 50, 60, 30, "Back")
+    save = button(surface, 30, 100, 60, 30, "Save")
+    txt = None
     global editScreen
     global knotMap
 
@@ -206,7 +207,7 @@ def instructionScreen():
     global knotCount
     knotCount = 0
     yScroll = 0
-    enterStringOffset = 60
+    enterStringOffset = 70
 
     maxKnots = 8
     if knotMap.width > maxKnots:
@@ -215,6 +216,8 @@ def instructionScreen():
     spacing = (size*3)
     gridWidth = knotMap.width * spacing + (knotMap.width - 1) + enterStringOffset
     x = (surface.get_width() - gridWidth) // 2
+    txt = pg.font.Font(None, size)
+
 
     class colorPoints:
         def __init__(self):
@@ -231,8 +234,8 @@ def instructionScreen():
     oldRow = None
     global posX
     posX = x + spacing
-    #scrollWindow = pg.Surface((x+knotMap.width * spacing, y+knotMap.length * spacing + 50))
-    scrollWindow = pg.Surface((gridWidth, y + knotMap.length * spacing + 100))
+
+    scrollWindow = pg.Surface((gridWidth+50, y + knotMap.length * spacing + 100))
     scrollWindow.fill((255, 255, 255))
 
     #info for dynamically loaded pollygon arrow:
@@ -272,32 +275,23 @@ def instructionScreen():
                         pg.draw.rect(scrollWindow, (214, 214, 214), pg.Rect(posX - dynamicSize*-0.4 // 2, y - 40, dynamicSize*-0.4, knotMap.length * spacing + 20), border_radius=15)
                         oldRow = xRow
 
-
+                    text = txt.render(str(yRow), True, (128, 128, 128))
+                    scrollWindow.blit(text, (posX + ((knotMap.width - 1 - xRow) * spacing) + 60, posY-size//4)) #right side
+                    scrollWindow.blit(text, ((posX - xRow * spacing) - 70, posY-size//4)) #left side
+                    #this puts greys lines to mark the y level, useful for the user to keep track
                     if direction:  # ->
                         if xRow == knotMap.width - 1:
-                            pg.draw.line(scrollWindow, (199, 199, 199), (posX, posY),
-                                         (posX + ((knotMap.width - 1 - xRow) * spacing) + 50, posY), dynamicSize - 1)
+                            pg.draw.line(scrollWindow, (199, 199, 199), (posX, posY),(posX + ((knotMap.width - 1 - xRow) * spacing) + 50, posY), 1)
                         elif xRow == 0:
-                            pg.draw.line(scrollWindow, (199, 199, 199), (posX, posY),
-                                         ((posX - xRow * spacing) - 50, posY), dynamicSize)
-                        
+                            pg.draw.line(scrollWindow, (199, 199, 199), (posX, posY),((posX - xRow * spacing) - 50, posY), 1)
                     else:  # <-
+
                         if xRow == 0:
-                            pg.draw.line(scrollWindow, (199, 199, 199), (posX, posY),
-                                         ((posX - xRow * spacing) - 50, posY), dynamicSize)
-
+                            pg.draw.line(scrollWindow, (199, 199, 199), (posX, posY), ((posX - xRow * spacing) - 50, posY), 1)
                         elif xRow == knotMap.width - 1:
-                            pg.draw.line(scrollWindow, (199, 199, 199), (posX, posY),
-                                         (posX + ((knotMap.width - 1 - xRow) * spacing) + 50, posY), dynamicSize - 1)
-                        
+                            pg.draw.line(scrollWindow, (199, 199, 199), (posX, posY), (posX + ((knotMap.width - 1 - xRow) * spacing) + 50, posY), 1)
 
-                    '''if xRow == knotMap.width: # ->
-                        pg.draw.line(scrollWindow, (199, 199, 199), (posX, posY),((posX - xRow * spacing) - 50, posY), dynamicSize)
-                        print("ok8")
-                        pass
-                    elif xRow == 0: # <-
-                        #pg.draw.line(scrollWindow, (199, 199, 199), (posX, posY),(posX + ((knotMap.width - 1 - xRow) * spacing) + 50, posY), dynamicSize-1)
-                        pass'''
+
                     #this while draws the lines  between the  knots that shows where the strings are suppose to go next
                     lining = True
                     i = 0
@@ -398,6 +392,8 @@ def instructionScreen():
                 if event.button == 1:# left click
                     if back.isPressed(event):
                         editScreen = True
+                    if save.isPressed(event):
+                        pg.image.save(scrollWindow, 'surface.png')
             elif event.type == pg.MOUSEWHEEL:
                 yScroll -= event.y * 30.5
                 #xS += event.x* 30.5
