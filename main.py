@@ -2,6 +2,8 @@ import pygame as pg
 pg.init()
 from pygame.locals import *
 import pygame.gfxdraw as gfx
+import os
+import sys
 
 import time
 # surface = pg.display.set_mode((500, 500))
@@ -166,22 +168,43 @@ def editBitmap(screen, pos, bitmap, size, color=0):
                         found = True
                     knotCount = knotCount + 1
 
-def createBitmap(screen, x, y, bitmap, size, create=False):
+def createBitmap(screen, x, y, size, bitmap, create=False, width=0, length=0):
     spacing = size + 1
 
     if create == True:
-        bitmap.x = x
-        bitmap.y = y
-        bitmap.braceletKnots.clear()
+        if bitmap == None or width == width and bitmap.length == length:
+            bitmap = knotList(width, length)
+            bitmap.x = x
+            bitmap.y = y
+            bitmap.braceletKnots.clear()
 
-        for knot in range(bitmap.width * bitmap.length):
-            bitmap.braceletKnots.append(bitmap.knotInfo(defaultColor))
+            for knot in range(bitmap.width * bitmap.length):
+                bitmap.braceletKnots.append(bitmap.knotInfo(defaultColor))
+        else:
+            for runDownList in range(bitmap.length - 1, - 1, - 1):
+                 for difference in range(abs(bitmap.width - width)):
+                    if bitmap.width < width:# if new width is bigger
+                        bitmap.braceletKnots.insert(runDownList*bitmap.width+bitmap.width, bitmap.knotInfo(defaultColor))
+                    else: # if new width is smaller
+                        bitmap.braceletKnots.pop(runDownList * bitmap.width+width)
+            bitmap.width = width
+
+            for difference in range(abs(bitmap.length - length)):
+                 for runUpList in range(bitmap.width):
+                    if bitmap.length < length:  # if new width is bigger
+                        bitmap.braceletKnots.append(bitmap.knotInfo(defaultColor))
+                    else:  # if new width is smaller
+                        bitmap.braceletKnots.pop()
+            bitmap.length = length
 
     knotCount = 0
     for yRow in range(bitmap.length):
         for xRow in range(bitmap.width):
-            pg.draw.rect(screen, bitmap.braceletKnots[knotCount].color, (xRow * spacing + x, yRow * spacing + y, size, size))
+            pg.draw.rect(screen, bitmap.braceletKnots[knotCount].color,(xRow * spacing + x, yRow * spacing + y, size, size))
             knotCount = knotCount + 1
+
+    if create == True:
+        return bitmap
 
 def instructionScreen():
     surface.fill((255, 255, 255))
@@ -393,7 +416,14 @@ def instructionScreen():
                     if back.isPressed(event):
                         editScreen = True
                     if save.isPressed(event):
-                        pg.image.save(scrollWindow, 'surface.png')
+                        if getattr(sys, 'frozen', False):
+                            application_path = os.path.dirname(sys.executable)
+                        elif __file__:
+                            application_path = os.path.dirname(__file__)
+
+                        config_path = os.path.join(application_path, "surface.png")
+
+                        pg.image.save(scrollWindow, config_path)
             elif event.type == pg.MOUSEWHEEL:
                 yScroll -= event.y * 30.5
                 #xS += event.x* 30.5
@@ -441,7 +471,7 @@ def main():
         scrollWindow = pg.Surface((gridWidth, y + knotMap.length * editScreenSpacing + 100))
         scrollWindow.fill((255, 255, 255))
 
-        createBitmap(scrollWindow, x, y, knotMap, editGridSize, False)
+        createBitmap(scrollWindow, x, y, editGridSize, knotMap, False)
         x = (surface.get_width() - gridWidth) // 2
 
         hasCreatedBitmap = True
@@ -481,15 +511,15 @@ def main():
 
                         #if not knotMap is None:
                             #editBitmap()
-                        knotMap = knotList(int(xStringInput.txt), int(yStringInput.txt))
+                        #knotMap = knotList(int(xStringInput.txt), int(yStringInput.txt))
 
-                        if knotMap.width > maxKnots:
-                            editGridSize = ((maxKnots * editGridSize + (maxKnots - 1)) - (knotMap.width - 1)) // knotMap.width
+                        if int(xStringInput.txt) > maxKnots:
+                            editGridSize = ((maxKnots * editGridSize + (maxKnots - 1)) - (int(xStringInput.txt) - 1)) // int(xStringInput.txt)
 
-                        gridWidth = knotMap.width * editGridSize + (knotMap.width - 1)
-                        scrollWindow = pg.Surface((gridWidth, y + knotMap.length * editScreenSpacing + 100))
+                        gridWidth = int(xStringInput.txt) * editGridSize + (int(xStringInput.txt) - 1)
+                        scrollWindow = pg.Surface((gridWidth, y + int(yStringInput.txt) * editScreenSpacing + 100))
                         scrollWindow.fill((255, 255, 255))
-                        createBitmap(scrollWindow, x, y, knotMap, editGridSize, True)
+                        knotMap = createBitmap(scrollWindow, x, y, editGridSize, knotMap, True, int(xStringInput.txt), int(yStringInput.txt))
                         x = (surface.get_width() - gridWidth) // 2
 
                         hasCreatedBitmap = True
@@ -501,9 +531,7 @@ def main():
                     if clearGrid.isPressed(event) and hasCreatedBitmap: #if there is  already  a grid loop through the  color and set everything to grey
                         y = 100
                         x = 2
-                        for knot in knotMap.braceletKnots:
-                            knot.color = defaultColor
-                        createBitmap(scrollWindow, x, y, knotMap, editGridSize, False)
+                        knotMap = createBitmap(scrollWindow, x, y, editGridSize, knotMap, True, knotMap.width, knotMap.length)
                         x = (surface.get_width() - gridWidth) // 2
 
 
