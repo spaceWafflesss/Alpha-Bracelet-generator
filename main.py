@@ -258,7 +258,7 @@ def instructionScreen():
     global posX
     posX = x + spacing
 
-    scrollWindow = pg.Surface((gridWidth+50, y + knotMap.length * spacing + 100))
+    scrollWindow = pg.Surface((gridWidth+50, y + knotMap.length * spacing + 100), pg.SRCALPHA)
     scrollWindow.fill((255, 255, 255))
 
     #info for dynamically loaded pollygon arrow:
