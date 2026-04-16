@@ -81,6 +81,54 @@ class ColorPicker:
         center = self.rect.left + self.rad + self.p * self.pwidth, self.rect.centery
         pg.draw.circle(screen, self.color, center, self.rect.height // 2.5)'''
 
+class ColorPicker:
+    def __init__(self, x, y, l, size, isGreyScale):
+        self.rect = pg.Rect(x, y, size, l)
+        self.image = pg.Surface((size, l))
+        self.image.fill((255, 255, 255))
+        self.rad = size // 2
+        if isGreyScale:
+            self.color = (0, 0, 0)
+        else:
+            self.color = (255, 0, 0)
+        self.pwidth = l - self.rad * 2
+        self.isGreyScale = isGreyScale
+
+        for i in range(self.pwidth):
+            color = pg.Color(0)
+            if not self.isGreyScale:
+                color.hsla = (int(360 * i / self.pwidth), 100, 50, 100)
+            else:
+                value = int(255 * i / self.pwidth)
+                color = (value, value, value)
+                #color.hsla = (0, 0, int(100 - (100 * i / self.pwidth)), 100)
+
+            pg.draw.rect(self.image, color, (size // 3, i + self.rad, size - 2 * size // 3, 1), border_radius=5)
+        self.p = 0
+
+
+    def update(self, screen):
+        mouse_buttons = pg.mouse.get_pressed()
+        mouse_pos = pg.mouse.get_pos()
+        if mouse_buttons[0] and self.rect.collidepoint(mouse_pos):
+            self.p = (mouse_pos[1] - self.rect.top - self.rad) / self.pwidth
+            self.p = (max(0, min(self.p, 1)))
+
+            getColor = pg.Color(0)
+            if not self.isGreyScale:
+                getColor.hsla = (int(self.p * 360), 100, 50, 100)
+            else:
+                value = int(255 * self.p)
+                getColor = (value, value, value)
+            self.color = getColor
+
+        screen.blit(self.image, self.rect)
+        center = self.rect.centerx, self.rect.top + self.rad + self.p * self.pwidth
+        pg.draw.circle(screen, self.color, center, self.rect.width // 2.5)
+
+        if mouse_buttons[0] and self.rect.collidepoint(mouse_pos):
+            return self.color
+
 class txtInputBox:
     def __init__(self, screen, x, y, w, h, showTxt="", txt=""):
         self.txtInput = pg.Rect(x, y, w, h)
@@ -115,9 +163,10 @@ class txtInputBox:
     def event(self, event):
         if event.type == pg.MOUSEBUTTONDOWN:
             if self.txtInput.collidepoint(event.pos):
+                self.text = medTxt.render(self.showTxt, True, (255, 0, 0))
+                self.screen.blit(self.text, (self.x + 5, self.y + 5))
                 self.enterTxt = True
                 self.txt = ""
-                # print(self.enterTxt)
             else:
                 self.enterTxt = False
 
@@ -132,10 +181,7 @@ class txtInputBox:
 
                 if not self.txt.isdigit():
                     self.color = (255, 0, 0)
-                    print("not red")
                 else:
-                    # drawBitmap(7, int(self.txt))
-                    # print(self.txt)
                     self.color = (92, 93, 95)
 
 class knotList:
@@ -172,7 +218,7 @@ def createBitmap(screen, x, y, size, bitmap, create=False, width=0, length=0):
     spacing = size + 1
 
     if create == True:
-        if bitmap == None or width == width and bitmap.length == length:
+        if bitmap == None or bitmap.width == width and bitmap.length == length:
             bitmap = knotList(width, length)
             bitmap.x = x
             bitmap.y = y
@@ -394,17 +440,7 @@ def instructionScreen():
                     # border
                     pg.draw.polygon(scrollWindow, outside, points, 1)
 
-                '''if direction == False:
-                    knotCount = knotCount + 1
-                elif direction == True:
-                    knotCount = knotCount - 1'''
 
-                #knotCount = knotCount + 1
-
-
-                #pg.display.update()  # show the new circle
-
-                #pg.time.delay(500)  # 1000 ms = 1 second
     #xS = 0
     while editScreen == False:
         for event in pg.event.get():
@@ -421,9 +457,17 @@ def instructionScreen():
                         elif __file__:
                             application_path = os.path.dirname(__file__)
 
-                        config_path = os.path.join(application_path, "surface.png")
+                        config_path = os.path.join(application_path, "bracelate.png")
 
-                        pg.image.save(scrollWindow, config_path)
+                        i = 0
+                        while True:
+                            if os.path.exists(config_path):
+                                i = i + 1
+                            else:
+                                pg.image.save(scrollWindow, config_path)
+                                break
+                            config_path = os.path.join(application_path, "bracelet" + str(i) + ".png")
+
             elif event.type == pg.MOUSEWHEEL:
                 yScroll -= event.y * 30.5
                 #xS += event.x* 30.5
@@ -443,9 +487,11 @@ def main():
     xStringInput.update()
     yStringInput.update()
 
-    cp = ColorPicker(900, 450, 200, 40)
-    # drawBitmap(5, 5)
     surface.fill((255, 255, 255))
+
+    cp = ColorPicker(890, 450, 200, 40, False)
+    cpGreyscale = ColorPicker(930, 450, 200, 40, True)
+    currentColor = cp.color
 
     editGridSize = 25
     maxKnots = 30
@@ -492,26 +538,23 @@ def main():
             if pg.mouse.get_pressed()[0]:
                 if hasCreatedBitmap == True:
                     xScrollWindow, y = pg.mouse.get_pos()
-                    editBitmap(scrollWindow, (xScrollWindow - x, y + yScroll), knotMap, editGridSize, cp.color)
+                    editBitmap(scrollWindow, (xScrollWindow - x, y + yScroll), knotMap, editGridSize, currentColor)
 
             if event.type == pg.MOUSEBUTTONDOWN:
                 if event.button == 1:  # left click
-                    cp.update(surface)
+                    #cp.update(surface)
+                    #cpGreyscale.update(surface)
 
                     if xStringInput.txt.isdigit() and yStringInput.txt.isdigit() and displayEditGrid.isPressed(event):
                         x = 2
                         y = 100
                         editGridSize =  25
 
-                        if firstGridUse == False:
+                        if firstGridUse == False: # removes previous grid by setting scrollWindow to white
                             scrollWindow.fill((255, 255, 255))
                             x = (surface.get_width() - gridWidth) // 2
                             surface.blit(scrollWindow, (x, 0), area=pg.Rect(0, yScroll, surface.get_width(), surface.get_height()))
                             x  =  2
-
-                        #if not knotMap is None:
-                            #editBitmap()
-                        #knotMap = knotList(int(xStringInput.txt), int(yStringInput.txt))
 
                         if int(xStringInput.txt) > maxKnots:
                             editGridSize = ((maxKnots * editGridSize + (maxKnots - 1)) - (int(xStringInput.txt) - 1)) // int(xStringInput.txt)
@@ -536,7 +579,7 @@ def main():
 
 
                 elif event.button == 3:  # right click
-                    cp.color = surface.get_at(pg.mouse.get_pos())
+                    currentColor = surface.get_at(pg.mouse.get_pos())
                     cp.update(surface)
 
             elif event.type == pg.MOUSEWHEEL:
@@ -551,8 +594,10 @@ def main():
             yStringInput.update()
             yStringInput.displayTxt()
 
-            cp.update(surface)
-            # cp.draw(surface)
+            if cp.update(surface) != None:
+                currentColor = cp.color
+            elif cpGreyscale.update(surface) != None:
+                currentColor = cpGreyscale.color
 
             # xStringInput.update()
         # print(input_box1.txt)
