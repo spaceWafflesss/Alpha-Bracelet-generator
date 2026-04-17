@@ -6,7 +6,7 @@ import os
 import sys
 
 import time
-# surface = pg.display.set_mode((500, 500))
+
 surface = pg.display.set_mode((0, 0), pg.RESIZABLE)  # window
 background = (255, 255, 255)
 surface.fill(background)
@@ -457,8 +457,7 @@ def instructionScreen():
         clock.tick(60)
 
 def main():
-    # global surface
-    # global x, y
+    # begin by initializing the structures, text boxes buttons and sliders
     global editScreen
     global knotMap
     dynamicSettingsPos = surface.get_width()
@@ -488,6 +487,8 @@ def main():
     yScroll = 0
     scrollWindow = pg.Surface((1, 1))
 
+    # check if a pattern has already been created and if so displays it, useful when returning
+    #from instructionsScreen
     if not knotMap is None:
         y = 100
         x = 2
@@ -504,7 +505,7 @@ def main():
         hasCreatedBitmap = True
         firstGridUse = False
 
-
+    # keep the display updating by checking if editScreen is True
     while editScreen:
         for event in pg.event.get():
             if event.type == pg.QUIT:
@@ -516,16 +517,18 @@ def main():
                 # y = surface.get_width()/100
                 pass
 
+      		# if the left click is being held down get mouse position and check if it is on a knot, updating it if so
             if pg.mouse.get_pressed()[0]:
                 if hasCreatedBitmap == True:
                     xScrollWindow, y = pg.mouse.get_pos()
                     editBitmap(scrollWindow, (xScrollWindow - x, y + yScroll), knotMap, editGridSize, currentColor)
 
+			# if the left click is click check if the mouse is over any buttons
             if event.type == pg.MOUSEBUTTONDOWN:
                 if event.button == 1:  # left click
-                    #cp.update(surface)
-                    #cpGreyscale.update(surface)
-
+                             
+					# if an integer value is entered into “Strings” and “Length” and the “Load” button
+                    # is pressed create and display a new grid
                     if xStringInput.txt.isdigit() and yStringInput.txt.isdigit() and displayEditGrid.isPressed(event):
                         if not int(xStringInput.txt) < 1:
                             x = 2
@@ -537,10 +540,12 @@ def main():
                                 x = (surface.get_width() - gridWidth) // 2
                                 surface.blit(scrollWindow, (x, 0), area=pg.Rect(0, yScroll, surface.get_width(), surface.get_height()))
                                 x  =  2
-
+								
+                             # if the width of the grid is more than 30 make the squares smaller so they take up less space
                             if round(surface.get_width()/2) + int(xStringInput.txt) * editScreenSpacing > surface.get_width()-60:
                                 editGridSize = ((maxKnots * editGridSize + (maxKnots - 1)) - (int(xStringInput.txt) - 1)) // int(xStringInput.txt)
-
+				
+                			# center, save, and display the new grid
                             gridWidth = int(xStringInput.txt) * editGridSize + (int(xStringInput.txt) - 1)
                             scrollWindow = pg.Surface((gridWidth, y + int(yStringInput.txt) * editScreenSpacing + 100))
                             scrollWindow.fill((255, 255, 255))
@@ -558,6 +563,7 @@ def main():
                             hasCreatedBitmap = True
                             firstGridUse = False
 
+					 # if “Apply” has been pressed set editScreen to False, the program will open instructionScreen.
                     if displayInstruction.isPressed(event) and hasCreatedBitmap:
                         if not knotMap.width <= 1:
                             editScreen = False
@@ -568,16 +574,16 @@ def main():
                         knotMap = createBitmap(scrollWindow, x, y, editGridSize, knotMap, True, knotMap.width, knotMap.length)
                         x = (surface.get_width() - gridWidth) // 2
 
-
-                elif event.button == 3:  # right click
+  				# if the mouse is right-clicked set the currentColor to whatever the color is at the position of the mouse. (Basically copy-paste)
+                elif event.button == 3:  #right click
                     currentColor = surface.get_at(pg.mouse.get_pos())
                     cp.update(surface)
 
+			# if the scrollwheel moves then redraw scrollWindow and that y position
             elif event.type == pg.MOUSEWHEEL:
                 yScroll -= event.y * 30.5
-            if event.type == pg.KEYDOWN:
-                pass
 
+			# update the text boxes
             xStringInput.event(event)
             xStringInput.update()
             xStringInput.displayTxt()
@@ -585,13 +591,13 @@ def main():
             yStringInput.update()
             yStringInput.displayTxt()
 
+			# sets the current color to which ever color was selected last
             if cp.update(surface) != None:
                 currentColor = cp.color
             elif cpGreyscale.update(surface) != None:
                 currentColor = cpGreyscale.color
 
-            # xStringInput.update()
-        # print(input_box1.txt)
+        # if grid pattern exists update the screen with it
         if not knotMap is None:
             surface.blit(scrollWindow, (x, 0), area=pg.Rect(0, yScroll, surface.get_width(), surface.get_height()))
 
