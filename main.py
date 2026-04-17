@@ -260,18 +260,9 @@ def instructionScreen():
     global editScreen
     global knotMap
 
-    if knotMap is not None:
-        #createBitmap(100, 100, knotMap)
-        pass
-    else:
-        print("ok6")
-
-
-    x = 170
     y = 100
 
     size = 18
-    #spacing = size + 50
 
     global knotCount
     knotCount = 0
@@ -279,7 +270,7 @@ def instructionScreen():
     enterStringOffset = 70
 
     maxKnots = 8
-    if knotMap.width > maxKnots:
+    if round(surface.get_width()/2) - knotMap.width * (size * 3) < 60:
         size = ((maxKnots * size + (maxKnots - 1)) + (knotMap.width - 1)) // knotMap.width
 
     spacing = (size*3)
@@ -304,7 +295,7 @@ def instructionScreen():
     global posX
     posX = x + spacing
 
-    scrollWindow = pg.Surface((gridWidth+50, y + knotMap.length * spacing + 100), pg.SRCALPHA)
+    scrollWindow = pg.Surface((gridWidth+30, y + knotMap.length * spacing + 100), pg.SRCALPHA)
     scrollWindow.fill((255, 255, 255))
 
     #info for dynamically loaded pollygon arrow:
@@ -316,8 +307,6 @@ def instructionScreen():
 
 
     for run in range(0, 2):
-        #knotCount = 0
-
         for yRow in range(knotMap.length):
             posY = y + yRow * spacing
 
@@ -338,10 +327,10 @@ def instructionScreen():
                     dynamicSize = round(size * 0.5)
                     if oldRow != xRow and yRow == 0:
                         # center empty rectangle through circles
-                        pg.draw.rect(scrollWindow, (0, 0, 0),  pg.Rect(posX - dynamicSize*-1.5 // 2, y - 50, dynamicSize*-1.5, knotMap.length * spacing + 40), 1, border_radius=15)
+                        pg.draw.rect(scrollWindow, (0, 0, 0),  pg.Rect(posX - dynamicSize*-1.5 // 2, y - 50, dynamicSize*-1.5, knotMap.length * spacing + size + 40), 1, border_radius=15)
 
                         # draw grey line in between
-                        pg.draw.rect(scrollWindow, (214, 214, 214), pg.Rect(posX - dynamicSize*-0.4 // 2, y - 40, dynamicSize*-0.4, knotMap.length * spacing + 20), border_radius=15)
+                        pg.draw.rect(scrollWindow, (214, 214, 214), pg.Rect(posX - dynamicSize*-0.4 // 2, y - 40, dynamicSize*-0.4, knotMap.length * spacing + size + 20), border_radius=15)
                         oldRow = xRow
 
                     text = txt.render(str(yRow), True, (128, 128, 128))
@@ -359,7 +348,6 @@ def instructionScreen():
                             pg.draw.line(scrollWindow, (199, 199, 199), (posX, posY), ((posX - xRow * spacing) - 50, posY), 1)
                         elif xRow == knotMap.width - 1:
                             pg.draw.line(scrollWindow, (199, 199, 199), (posX, posY), (posX + ((knotMap.width - 1 - xRow) * spacing) + 50, posY), 1)
-
 
                     #this while draws the lines  between the  knots that shows where the strings are suppose to go next
                     lining = True
@@ -398,11 +386,6 @@ def instructionScreen():
                     mid = posY
 
                     if direction: #facing right ->
-                        '''text = arrowIn.render("->", True, (255, 255, 255))
-                        scrollWindow.blit(text, (posX - 10, posY - 10))  # center text in circle
-                        text = arrowOut.render("->", True, (0, 0, 0))
-                        scrollWindow.blit(text, (posX - 10, posY - 10))  # center text in circle'''
-
                         points = [
                             (left, posY - h * 0.25),
                             (left + body, posY - h * 0.25),
@@ -414,10 +397,6 @@ def instructionScreen():
                         ]
 
                     else: #facing left <-
-                        '''text = arrowIn.render("<-", True, (255, 255, 255))
-                        scrollWindow.blit(text, (posX - 10, posY - 10))  # center text in circle
-                        text = arrowOut.render("<-", True, (0, 0, 0))
-                        scrollWindow.blit(text, (posX - 10, posY - 10))  # center text in circle'''
                         points = [
                             (right, posY - h * 0.25),
                             (right - body, posY - h * 0.25),
@@ -482,24 +461,26 @@ def main():
     # global x, y
     global editScreen
     global knotMap
-    xStringInput = txtInputBox(surface, 900, 200, 60, 30, "Strings")
-    yStringInput = txtInputBox(surface, 900, 250, 60, 30, "Length")
+    dynamicSettingsPos = surface.get_width()
+
+    xStringInput = txtInputBox(surface, dynamicSettingsPos-80, 200, 60, 30, "Strings")
+    yStringInput = txtInputBox(surface, dynamicSettingsPos-80, 250, 60, 30, "Length")
     xStringInput.update()
     yStringInput.update()
 
     surface.fill((255, 255, 255))
 
-    cp = ColorPicker(890, 450, 200, 40, False)
-    cpGreyscale = ColorPicker(930, 450, 200, 40, True)
+    cp = ColorPicker(dynamicSettingsPos-80, 450, 200, 40, False)
+    cpGreyscale = ColorPicker(dynamicSettingsPos-40, 450, 200, 40, True)
     currentColor = cp.color
 
     editGridSize = 25
     maxKnots = 30
     editScreenSpacing = 25
 
-    displayEditGrid = button(surface, 900, 300, 60, 30, "Load")
-    displayInstruction = button(surface, 900, 100, 60, 30, "Apply")
-    clearGrid = button(surface, 900, 160, 60, 30, "Clear")
+    displayEditGrid = button(surface, dynamicSettingsPos-80, 300, 60, 30, "Load")
+    displayInstruction = button(surface, dynamicSettingsPos-80, 100, 60, 30, "Apply")
+    clearGrid = button(surface, dynamicSettingsPos-80, 160, 60, 30, "Clear")
     hasCreatedBitmap = False
     firstGridUse = True
     #x = 2
@@ -510,7 +491,7 @@ def main():
     if not knotMap is None:
         y = 100
         x = 2
-        if knotMap.width > maxKnots:
+        if round(surface.get_width()/2) + knotMap.width * editScreenSpacing > surface.get_width()-60:
             editGridSize = ((maxKnots * editGridSize + (maxKnots - 1)) - (knotMap.width - 1)) // knotMap.width
 
         gridWidth = knotMap.width * editGridSize + (knotMap.width - 1)
@@ -546,30 +527,40 @@ def main():
                     #cpGreyscale.update(surface)
 
                     if xStringInput.txt.isdigit() and yStringInput.txt.isdigit() and displayEditGrid.isPressed(event):
-                        x = 2
-                        y = 100
-                        editGridSize =  25
+                        if not int(xStringInput.txt) < 1:
+                            x = 2
+                            y = 100
+                            editGridSize =  25
 
-                        if firstGridUse == False: # removes previous grid by setting scrollWindow to white
+                            if firstGridUse == False: # removes previous grid by setting scrollWindow to white
+                                scrollWindow.fill((255, 255, 255))
+                                x = (surface.get_width() - gridWidth) // 2
+                                surface.blit(scrollWindow, (x, 0), area=pg.Rect(0, yScroll, surface.get_width(), surface.get_height()))
+                                x  =  2
+
+                            if round(surface.get_width()/2) + int(xStringInput.txt) * editScreenSpacing > surface.get_width()-60:
+                                editGridSize = ((maxKnots * editGridSize + (maxKnots - 1)) - (int(xStringInput.txt) - 1)) // int(xStringInput.txt)
+
+                            gridWidth = int(xStringInput.txt) * editGridSize + (int(xStringInput.txt) - 1)
+                            scrollWindow = pg.Surface((gridWidth, y + int(yStringInput.txt) * editScreenSpacing + 100))
                             scrollWindow.fill((255, 255, 255))
+                            knotMap = createBitmap(scrollWindow, x, y, editGridSize, knotMap, True, int(xStringInput.txt), int(yStringInput.txt))
                             x = (surface.get_width() - gridWidth) // 2
-                            surface.blit(scrollWindow, (x, 0), area=pg.Rect(0, yScroll, surface.get_width(), surface.get_height()))
-                            x  =  2
 
-                        if int(xStringInput.txt) > maxKnots:
-                            editGridSize = ((maxKnots * editGridSize + (maxKnots - 1)) - (int(xStringInput.txt) - 1)) // int(xStringInput.txt)
+                            if knotMap.width <= 1:
+                                text = largeTxt.render("Pattern too small", True, (255, 0, 0))
+                            else:
+                                text = largeTxt.render("Pattern too small", True, (255, 255, 255))
 
-                        gridWidth = int(xStringInput.txt) * editGridSize + (int(xStringInput.txt) - 1)
-                        scrollWindow = pg.Surface((gridWidth, y + int(yStringInput.txt) * editScreenSpacing + 100))
-                        scrollWindow.fill((255, 255, 255))
-                        knotMap = createBitmap(scrollWindow, x, y, editGridSize, knotMap, True, int(xStringInput.txt), int(yStringInput.txt))
-                        x = (surface.get_width() - gridWidth) // 2
+                            surface.blit(text, (surface.get_width() // 2 + 20, 20))
+                            pg.display.flip()
 
-                        hasCreatedBitmap = True
-                        firstGridUse = False
+                            hasCreatedBitmap = True
+                            firstGridUse = False
 
                     if displayInstruction.isPressed(event) and hasCreatedBitmap:
-                        editScreen = False
+                        if not knotMap.width <= 1:
+                            editScreen = False
 
                     if clearGrid.isPressed(event) and hasCreatedBitmap: #if there is  already  a grid loop through the  color and set everything to grey
                         y = 100
