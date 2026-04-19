@@ -1,39 +1,35 @@
+# A-Level AQA NEA project Alpha Bracelet Generator
 import pygame as pg
 pg.init()
-from pygame.locals import *
 import pygame.gfxdraw as gfx
 import os
 import sys
 
-import time
-
 surface = pg.display.set_mode((0, 0), pg.RESIZABLE)  # window
-background = (255, 255, 255)
-surface.fill(background)
-color = (201, 201, 189)
+
 defaultColor = (56, 56, 56)
 
 clock = pg.time.Clock()
-largeTxt = pg.font.Font(None, 32)
-medTxt = pg.font.Font(None, 20)
 
-editScreen = True
 knotMap = None
 
-# the button class creates a green button where ever the position is set, and will return whether it has been presses if isPressed is called
+
+# the button class creates a green button where ever the position is set, and will return whether it has been presses
+# if isPressed is called
 class button:
-     # set button variables and display button with the label text, eg: showTxt=“Apply”
+    # set button variables and display button with the label text, eg: showTxt=“Apply”
     def __init__(self, screen, x, y, w, h, showTxt=""):
         self.screen = screen
         self.txtInput = pg.Rect(x, y, w, h)
         self.x = x
-        self.y =  y
-        self.text = medTxt.render(showTxt, True, (0, 0, 0))
+        self.y = y
+        self.medTxt = pg.font.Font(None, 20)
+        self.text = self.medTxt.render(showTxt, True, (0, 0, 0))
 
         pg.draw.rect(screen, (0, 204, 102), self.txtInput, border_radius=5)
         screen.blit(self.text, (self.x + 15, self.y + 9))
 
-     # return True if mouse is clicked over button area, if not return false
+    # return True if mouse is clicked over button area, if not return false
     def isPressed(self, event):
         pg.draw.rect(self.screen, (0, 204, 102), self.txtInput, border_radius=5)
         self.screen.blit(self.text, (self.x + 15, self.y + 9))
@@ -42,7 +38,9 @@ class button:
         else:
             return False
 
-# the color picker creates a slider that goes through a rectangle that displays all colors in RGB or greyscale., if the user dragged the mouse over the rectangle’s surface the circle that represents the current color move the that vertical position and updates the color to what ever color the rect was under the circle.
+# the color picker creates a slider that goes through a rectangle that displays all colors in RGB or greyscale., if the
+# user dragged the mouse over the rectangle’s surface the circle that represents the current color move the that
+# vertical position and updates the color to what ever color the rect was under the circle.
 class ColorPicker:
     # set color slider variables and display rect with the full RGB or grescale spectrum
     def __init__(self, x, y, l, size, isGreyScale):
@@ -87,21 +85,24 @@ class ColorPicker:
         screen.blit(self.image, self.rect)
         center = self.rect.centerx, self.rect.top + self.rad + self.p * self.pwidth
         pg.draw.circle(screen, self.color, center, self.rect.width // 2.5)
-         
+
         # if the mouse is over the rectangle’s surface then the color has been changed and the new color is returned
         if mouse_buttons[0] and self.rect.collidepoint(mouse_pos):
             return self.color
 
-# the text box is updated to check if the mouse has been clicked on it, if so the labal text eg: showTxt=“Strings” is turned red to show that the user can type, and the code starts checking for keystrokes
+# the text box is updated to check if the mouse has been clicked on it, if so the label text eg: showTxt=“Strings”
+# is turned red to show that the user can type, and the code starts checking for keystrokes
 class txtInputBox:
-    # set variables 
+    # set variables
     def __init__(self, screen, x, y, w, h, showTxt="", txt=""):
         self.txtInput = pg.Rect(x, y, w, h)
         self.txt = txt
         self.enterTxt = False
-        self.txt_surface = largeTxt.render(self.txt, True, (0, 255, 0))
+        self.largeTxt = pg.font.Font(None, 32)
+        self.medTxt = pg.font.Font(None, 20)
+        self.txt_surface = self.largeTxt.render(self.txt, True, (0, 255, 0))
         self.showTxt = showTxt
-        self.text = medTxt.render(self.showTxt, True, (0, 0, 0))
+        self.text = self.medTxt.render(self.showTxt, True, (0, 0, 0))
         self.w = w
         self.screen = screen
         self.color = (92, 93, 95)
@@ -113,7 +114,7 @@ class txtInputBox:
         if self.txt == "":
             self.screen.blit(self.text, (self.x + 5, self.y + 5))
         else:
-            self.txt_surface = largeTxt.render(self.txt, True, (0, 0, 0))
+            self.txt_surface = self.largeTxt.render(self.txt, True, (0, 0, 0))
             self.screen.blit(self.txt_surface, (self.txtInput.x + 5, self.txtInput.y + 3))
 
     # if a new character is entered or removed the whole text is removed and redrawn by filling  the area with a white rect, this makes sure the current text is always displayed
@@ -128,7 +129,7 @@ class txtInputBox:
     def event(self, event):
         if event.type == pg.MOUSEBUTTONDOWN:
             if self.txtInput.collidepoint(event.pos):
-                self.text = medTxt.render(self.showTxt, True, (255, 0, 0))
+                self.text = self.medTxt.render(self.showTxt, True, (255, 0, 0))
                 self.screen.blit(self.text, (self.x + 5, self.y + 5))
                 self.enterTxt = True
                 self.txt = ""
@@ -145,15 +146,16 @@ class txtInputBox:
                     self.txt += event.unicode
                     self.displayTxt()
 
-	   # if the character being entered is not an integer the text box turns red to show the user they have entered an illegals character
+                # if the character being entered is not an integer the text box turns red to show the user they have entered an illegals character
                 if not self.txt.isdigit():
                     self.color = (255, 0, 0)
                 else:
                     self.color = (92, 93, 95)
 
-
-
-# knotList is the class used to create the bitmap containing all the information for the pattern, width, length, position, and a list containing every knot and storing it by it’s color. The x and y position is needed for editBitmap so the grid can be recreated exactly where it is visually, if not the knot added would not match the visual position of the knot.
+# knotList is the class used to create the bitmap containing all the information for the pattern, width, length,
+# position, and a list containing every knot and storing it by it’s color. The x and y position is needed for
+# editBitmap so the grid can be recreated exactly where it is visually, if not the knot added would not match the
+# visual position of the knot.
 class knotList:
     def __init__(self, width, length):
         self.width = width
@@ -167,7 +169,8 @@ class knotList:
             self.color = color
 
 
-# this takes the users mouse position and loops through knotMap, checking the position of each cube in the grid to see if it’s position matches the mouse’s.
+# this takes the users mouse position and loops through knotMap, checking the position of each cube in the grid to see
+# if it’s position matches the mouse’s.
 def editBitmap(screen, pos, bitmap, size, color=0):
     spacing = size + 1
     if not len(bitmap.braceletKnots) == 0:
@@ -181,14 +184,15 @@ def editBitmap(screen, pos, bitmap, size, color=0):
                     testKnot = pg.Rect(xRow * spacing + bitmap.x, yRow * spacing + bitmap.y, size, size)
                     if testKnot.collidepoint(pos):
                         bitmap.braceletKnots[knotCount].color = color
-                        pg.draw.rect(screen, bitmap.braceletKnots[knotCount].color, (xRow * spacing + bitmap.x, yRow * spacing + bitmap.y, size, size))
+                        pg.draw.rect(screen, bitmap.braceletKnots[knotCount].color,
+                                     (xRow * spacing + bitmap.x, yRow * spacing + bitmap.y, size, size))
                         found = True
                     elif xRow >= bitmap.width - 1:
                         found = True
                     knotCount = knotCount + 1
 
 # this creates a bitmap and stores it in knotMap, sets the bitmap to the default color or simply displays the existing bitmap
-def createBitmap(screen, x, y, size, bitmap, create=False, width=0, length=0):
+def createBitmap(screen, x, y, size, bitmap, defaultColor, create=False, width=0, length=0):
     spacing = size + 1
 
     # if user wants to create a new bitmap or change the size of the current one.
@@ -202,19 +206,20 @@ def createBitmap(screen, x, y, size, bitmap, create=False, width=0, length=0):
 
             for knot in range(bitmap.width * bitmap.length):
                 bitmap.braceletKnots.append(bitmap.knotInfo(defaultColor))
-       
-       # else if the bitmap already exists and the user entered a new width or length, change the size of the bitmap by adding or removing the difference of size in width or height, this allows the user to change there side without loosing what they were previously working on, if the new size is smaller then any knot that have been created in that area will be removed.
+
+        # else if the bitmap already exists and the user entered a new width or length, change the size of the bitmap by adding or removing the difference of size in width or height, this allows the user to change there side without loosing what they were previously working on, if the new size is smaller then any knot that have been created in that area will be removed.
         else:
             for runDownList in range(bitmap.length - 1, - 1, - 1):
-                 for difference in range(abs(bitmap.width - width)):
-                    if bitmap.width < width:# if new width is bigger
-                        bitmap.braceletKnots.insert(runDownList*bitmap.width+bitmap.width, bitmap.knotInfo(defaultColor))
-                    else: # if new width is smaller
-                        bitmap.braceletKnots.pop(runDownList * bitmap.width+width)
+                for difference in range(abs(bitmap.width - width)):
+                    if bitmap.width < width:  # if new width is bigger
+                        bitmap.braceletKnots.insert(runDownList * bitmap.width + bitmap.width,
+                                                    bitmap.knotInfo(defaultColor))
+                    else:  # if new width is smaller
+                        bitmap.braceletKnots.pop(runDownList * bitmap.width + width)
             bitmap.width = width
 
             for difference in range(abs(bitmap.length - length)):
-                 for runUpList in range(bitmap.width):
+                for runUpList in range(bitmap.width):
                     if bitmap.length < length:  # if new width is bigger
                         bitmap.braceletKnots.append(bitmap.knotInfo(defaultColor))
                     else:  # if new width is smaller
@@ -225,7 +230,8 @@ def createBitmap(screen, x, y, size, bitmap, create=False, width=0, length=0):
     knotCount = 0
     for yRow in range(bitmap.length):
         for xRow in range(bitmap.width):
-            pg.draw.rect(screen, bitmap.braceletKnots[knotCount].color,(xRow * spacing + x, yRow * spacing + y, size, size))
+            pg.draw.rect(screen, bitmap.braceletKnots[knotCount].color,
+                         (xRow * spacing + x, yRow * spacing + y, size, size))
             knotCount = knotCount + 1
 
     # if the user wanted to modify the bitmap it is sent back to update the knotMap
@@ -238,33 +244,26 @@ def instructionScreen():
     surface.fill((255, 255, 255))
     back = button(surface, 30, 50, 60, 30, "Back")
     save = button(surface, 30, 100, 60, 30, "Save")
-    txt = None
-    global editScreen
-    global knotMap
 
     # this is where the pattern will appear on the screen
-    x = 170
     y = 100
 
     size = 18
-    #spacing = size + 50
 
-    global knotCount
     knotCount = 0
     yScroll = 0
     enterStringOffset = 70
 
-   # if the width of the pattern is more then 8 the size of the pattern is lowered to fit in the same space
+    # if the width of the pattern is more then 8 the size of the pattern is lowered to fit in the same space
     maxKnots = 8
     if knotMap.width > maxKnots:
         size = ((maxKnots * size + (maxKnots - 1)) + (knotMap.width - 1)) // knotMap.width
 
-    #various variables to dynamically control the size and position of each shape
-    spacing = (size*3)
+    # various variables to dynamically control the size and position of each shape
+    spacing = (size * 3)
     gridWidth = knotMap.width * spacing + (knotMap.width - 1) + enterStringOffset
     x = (surface.get_width() - gridWidth) // 2
     txt = pg.font.Font(None, size)
-
 
     # internal class where the position of each of the most recently used colors are kept in a list
     class colorPoints:
@@ -279,15 +278,12 @@ def instructionScreen():
 
     lineCords = colorPoints()
 
-    oldRow = None
-    global posX
-    posX = x + spacing
 
     # pattern surface is defined with the correct size and variables for arrow polygon are defined
-    scrollWindow = pg.Surface((gridWidth+50, y + knotMap.length * spacing + 100), pg.SRCALPHA)
+    scrollWindow = pg.Surface((gridWidth + 35, y + knotMap.length * spacing + 100), pg.SRCALPHA)
     scrollWindow.fill((255, 255, 255))
 
-    #info for dynamically loaded pollygon arrow:
+    # info for dynamically loaded pollygon arrow:
     w = size * 0.9  # total width
     h = size * 0.4  # total height
 
@@ -300,8 +296,9 @@ def instructionScreen():
         # for loop runs first down the length of the loop
         for yRow in range(knotMap.length):
             posY = y + yRow * spacing
-           
-           # the code goes in a zigzag code down the list, if the current vakue of yRow gives an integer when divided then it will go to the right, if not the reverse 
+
+            # the code goes in a zigzag code down the list, if the current value of yRow gives an integer when divided
+            # then it will go to the right, if not the reverse
             if yRow % 2 == 0:
                 x_range = range(knotMap.width)
                 direction = True
@@ -315,66 +312,104 @@ def instructionScreen():
             for xRow in x_range:
                 posX = enterStringOffset + xRow * spacing
                 knotCount = yRow * knotMap.width + xRow
-               
+
                 if run == 0:
                     dynamicSize = round(size * 0.5)
-                    # if xRow is on a new horizontal row and the yRow is at the top, place lines to mark what to tie the strings to.
-                    if oldRow != xRow and yRow == 0:
+
+                    # if yRow is at the top, place lines to mark what to tie the strings to.
+                    if yRow == 0:
                         # center empty rectangle through circles
-                        pg.draw.rect(scrollWindow, (0, 0, 0),  pg.Rect(posX - dynamicSize*-1.5 // 2, y - 50, dynamicSize*-1.5, knotMap.length * spacing + 40), 1, border_radius=15)
+                        pg.draw.rect(scrollWindow, (0, 0, 0),
+                                     pg.Rect(posX - dynamicSize * -1.5 // 2, y - 50, dynamicSize * -1.5,
+                                             knotMap.length * spacing + 40), 1, border_radius=15)
 
                         # draw grey line in between
-                        pg.draw.rect(scrollWindow, (214, 214, 214), pg.Rect(posX - dynamicSize*-0.4 // 2, y - 40, dynamicSize*-0.4, knotMap.length * spacing + 20), border_radius=15)
-                        oldRow = xRow
+                        pg.draw.rect(scrollWindow, (214, 214, 214),
+                                     pg.Rect(posX - dynamicSize * -0.4 // 2, y - 40, dynamicSize * -0.4,
+                                             knotMap.length * spacing + 20), border_radius=15)
 
-                    # display on both the right and left edge of the pattern which vertical row it is on as well as adding grey lines pointing to the postion so it is clear, useful for the user to keep track if where they are 
-                    text = txt.render(str(yRow), True, (128, 128, 128))
-                    scrollWindow.blit(text, (posX + ((knotMap.width - 1 - xRow) * spacing) + 60, posY-size//4)) #right side
-                    scrollWindow.blit(text, ((posX - xRow * spacing) - 70, posY-size//4)) #left side
-                   
+                    # display on both the right and left edge of the pattern which vertical row it is on as well as
+                    text = txt.render(str(yRow+1), True, (128, 128, 128))
+                    scrollWindow.blit(text, (posX + ((knotMap.width - 1 - xRow) * spacing) + 60,
+                                             posY - size // 4))  # right side
+                    scrollWindow.blit(text, ((posX - xRow * spacing) - 70, posY - size // 4))  # left side
+
+                    # adding grey lines pointing to the postion so it is clear, useful for the user to keep track if where they are
                     if direction:  # ->
                         if xRow == knotMap.width - 1:
-                            pg.draw.line(scrollWindow, (199, 199, 199), (posX, posY),(posX + ((knotMap.width - 1 - xRow) * spacing) + 50, posY), 1)
+                            pg.draw.line(scrollWindow, (199, 199, 199), (posX, posY),
+                                         (posX + ((knotMap.width - 1 - xRow) * spacing) + 50, posY), 1)
                         elif xRow == 0:
-                            pg.draw.line(scrollWindow, (199, 199, 199), (posX, posY),((posX - xRow * spacing) - 50, posY), 1)
+                            pg.draw.line(scrollWindow, (199, 199, 199), (posX, posY),
+                                         ((posX - xRow * spacing) - 50, posY), 1)
                     else:  # <-
                         if xRow == 0:
-                            pg.draw.line(scrollWindow, (199, 199, 199), (posX, posY), ((posX - xRow * spacing) - 50, posY), 1)
+                            pg.draw.line(scrollWindow, (199, 199, 199), (posX, posY),
+                                         ((posX - xRow * spacing) - 50, posY), 1)
                         elif xRow == knotMap.width - 1:
-                            pg.draw.line(scrollWindow, (199, 199, 199), (posX, posY), (posX + ((knotMap.width - 1 - xRow) * spacing) + 50, posY), 1)
+                            pg.draw.line(scrollWindow, (199, 199, 199), (posX, posY),
+                                         (posX + ((knotMap.width - 1 - xRow) * spacing) + 50, posY), 1)
+
+                    # if the current knot is not the same color as the previous knot draw a line between with the
+                    # previous knot's color anyway to show that the string continues
+                    if knotMap.braceletKnots[knotCount].color != knotMap.braceletKnots[knotCount - 1].color  and xRow != 0:
+                        pg.draw.line(scrollWindow, (0, 0, 0), (enterStringOffset + (xRow-1) * spacing, posY + 1),(posX, posY + 1), dynamicSize + 4)
+                        pg.draw.line(scrollWindow, lineCords.braceletKnots[i].color, (enterStringOffset + (xRow-1) * spacing, posY),(posX, posY), dynamicSize)
 
 
-                    #this while draws the lines between the knots that shows where the strings are suppose to go next by checking what the current knot color is, and looping through the lineCords list to check if an older when is there, if there is a line is created between the current and previous of the same color 
+                    # this while draws the lines between the knots that shows where the strings are suppose to go next
+                    # by checking what the current knot color is, and looping through the lineCords list to check if an
+                    # older when is there, if there is a line is created between the current and previous of the same color
                     lining = True
                     i = 0
                     while lining:
 
-                        # if at the start or finish of the width draw a line and there is a new color is that horizontal row add a line going into the pattern to show that a new string is being added
+                        # if at the start or finish of the width draw a line and there is a new color is that horizontal
+                        # row add a line going into the pattern to show that a new string is being added
                         if len(lineCords.braceletKnots) == 0 or i == len(lineCords.braceletKnots):
-                            lineCords.braceletKnots.append(lineCords.knotInfo(knotMap.braceletKnots[knotCount].color, posX, posY))
-    
-                           
-                            if direction == False: # <-
-                                pg.draw.rect(scrollWindow, (0, 0, 0),(min(posX, posX + ((knotMap.width - 1 - xRow) * spacing) + 50) + 1, (posY - dynamicSize // 2) - 1, abs(posX + ((knotMap.width - 1 - xRow) * spacing) + 50 - posX), dynamicSize+2), border_radius=15)
-                                pg.draw.rect(scrollWindow, lineCords.braceletKnots[i].color,(min(posX, posX + ((knotMap.width - 1 - xRow) * spacing) + 50), (posY - dynamicSize // 2), abs(posX + ((knotMap.width - 1 - xRow) * spacing) + 50 - posX), dynamicSize), border_radius=15)
+                            lineCords.braceletKnots.append(
+                                lineCords.knotInfo(knotMap.braceletKnots[knotCount].color, posX, posY))
+
+                            if direction == False:  # <-
+                                pg.draw.rect(scrollWindow, (0, 0, 0),
+                                             (min(posX, posX + ((knotMap.width - 1 - xRow) * spacing) + 50) + 1,
+                                              (posY - dynamicSize // 2) - 1,
+                                              abs(posX + ((knotMap.width - 1 - xRow) * spacing) + 50 - posX),
+                                              dynamicSize + 2), border_radius=15)
+                                pg.draw.rect(scrollWindow, lineCords.braceletKnots[i].color,
+                                             (min(posX, posX + ((knotMap.width - 1 - xRow) * spacing) + 50),
+                                              (posY - dynamicSize // 2),
+                                              abs(posX + ((knotMap.width - 1 - xRow) * spacing) + 50 - posX),
+                                              dynamicSize), border_radius=15)
                             else:
-                                pg.draw.rect(scrollWindow, (0, 0, 0), (min(posX, posX - (xRow * spacing) - 50) - 1, (posY - dynamicSize // 2) - 1, abs((posX - (xRow * spacing) - 50) - posX), dynamicSize+2), border_radius=15)
-                                pg.draw.rect(scrollWindow, lineCords.braceletKnots[i].color,(min(posX, posX - (xRow * spacing) - 50), (posY - dynamicSize // 2),abs((posX - (xRow * spacing) - 50) - posX), dynamicSize), border_radius=15)
+                                pg.draw.rect(scrollWindow, (0, 0, 0), (min(posX, posX - (xRow * spacing) - 50) - 1,
+                                                                       (posY - dynamicSize // 2) - 1,
+                                                                       abs((posX - (xRow * spacing) - 50) - posX),
+                                                                       dynamicSize + 2), border_radius=15)
+                                pg.draw.rect(scrollWindow, lineCords.braceletKnots[i].color,
+                                             (min(posX, posX - (xRow * spacing) - 50), (posY - dynamicSize // 2),
+                                              abs((posX - (xRow * spacing) - 50) - posX), dynamicSize),
+                                             border_radius=15)
                             lining = False
-             
-                        # if the color in the lineCords list is not the same as the current knot color then check the next color in the lineCords list is not, else if it is found draw the line and update the color’s position in lineCords
+
+                        # if the color in the lineCords list is not the same as the current knot color then check the
+                        # next color in the lineCords list is not, else if it is found draw the line and update the
+                        # color’s position in lineCords
                         elif lineCords.braceletKnots[i].color != knotMap.braceletKnots[knotCount].color:
                             i += 1
                         else:  # ->
-                            pg.draw.line(scrollWindow, (0, 0, 0), (posX, posY+1), (lineCords.braceletKnots[i].x, lineCords.braceletKnots[i].y+1), dynamicSize+4)
-                            pg.draw.line(scrollWindow, lineCords.braceletKnots[i].color, (posX, posY),(lineCords.braceletKnots[i].x, lineCords.braceletKnots[i].y), dynamicSize)
+                            pg.draw.line(scrollWindow, (0, 0, 0), (posX, posY + 1),
+                                         (lineCords.braceletKnots[i].x, lineCords.braceletKnots[i].y + 1),
+                                         dynamicSize + 4)
+                            pg.draw.line(scrollWindow, lineCords.braceletKnots[i].color, (posX, posY),
+                                         (lineCords.braceletKnots[i].x, lineCords.braceletKnots[i].y), dynamicSize)
                             lineCords.braceletKnots[i].x = posX
                             lineCords.braceletKnots[i].y = posY
                             lining = False
                 # if it’s on the second loop, loop through knotMap again, adding circles with the color of the knots to represent what to tie, as well as adding the arrow to show direction
                 else:
                     gfx.filled_circle(scrollWindow, posX, posY, size + 2, (0, 0, 0))  # border
-                    gfx.filled_circle(scrollWindow, posX, posY,  size, knotMap.braceletKnots[knotCount].color)
+                    gfx.filled_circle(scrollWindow, posX, posY, size, knotMap.braceletKnots[knotCount].color)
 
                     left = posX - w / 2
                     right = posX + w / 2
@@ -383,7 +418,7 @@ def instructionScreen():
                     mid = posY
 
                     # check which direction the row is going and add the arrow polygon inside the circle facing that direction
-                    if direction: #facing right ->
+                    if direction:  # facing right ->
                         points = [
                             (left, posY - h * 0.25),
                             (left + body, posY - h * 0.25),
@@ -394,7 +429,7 @@ def instructionScreen():
                             (left, posY + h * 0.25),
                         ]
 
-                    else: #facing left <-
+                    else:  # facing left <-
                         points = [
                             (right, posY - h * 0.25),
                             (right - body, posY - h * 0.25),
@@ -417,18 +452,19 @@ def instructionScreen():
                     # border
                     pg.draw.polygon(scrollWindow, outside, points, 1)
 
-
-    # once the pattern has been fully created the this loop runs until the user presses the “back” button to return to the first page, it checks where the mouse has been clicked, and moves the pattern as an image if the scroll wheel is moved
-    while editScreen == False:
+    # once the pattern has been fully created this loop runs until the user presses the “back” button to return to the first page, it checks where the mouse has been clicked, and moves the pattern as an image if the scroll wheel is moved
+    while True:
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 pg.quit()
                 return
             if event.type == pg.MOUSEBUTTONDOWN:
-                if event.button == 1:# left click
+                if event.button == 1:  # left click
+
+                    # exist funtion and return to master loop
                     if back.isPressed(event):
-                        editScreen = True
-                    # if the save button is pressed check if this program is an exe file or running in an IDE, then creating a png of the pattern in scrollWindow in the same location as the program. 
+                        return
+                    # if the save button is pressed check if this program is an exe file or running in an IDE, then creating a png of the pattern in scrollWindow in the same location as the program.
                     if save.isPressed(event):
                         if getattr(sys, 'frozen', False):
                             application_path = os.path.dirname(sys.executable)
@@ -436,7 +472,7 @@ def instructionScreen():
                             application_path = os.path.dirname(__file__)
 
                         config_path = os.path.join(application_path, "bracelate.png")
-     
+
                         # before saving the file, first check if a file with the same name already exists, if so, add a digit and check if that file also exists, it continues until an unused filename is found.
                         i = 0
                         while True:
@@ -447,53 +483,50 @@ def instructionScreen():
                                 break
                             config_path = os.path.join(application_path, "bracelet" + str(i) + ".png")
 
-            #change vertical pattern location using the scroll wheel input, * 30.5 makes it more responsive
+            # change vertical pattern location using the scroll wheel input, * 30.5 makes it more responsive
             elif event.type == pg.MOUSEWHEEL:
                 yScroll -= event.y * 30.5
-               
+
         # display and update the pattern window for any position change
         surface.blit(scrollWindow, (x, 0), area=pg.Rect(0, yScroll, surface.get_width(), surface.get_height()))
         pg.display.flip()
         clock.tick(60)
 
-
-def main():
+def main(knotMap):
     # begin by initializing the structures, text boxes buttons and sliders
-    global editScreen
-    global knotMap
+    largeTxt = pg.font.Font(None, 32)
     dynamicSettingsPos = surface.get_width()
 
-    xStringInput = txtInputBox(surface, dynamicSettingsPos-80, 200, 60, 30, "Strings")
-    yStringInput = txtInputBox(surface, dynamicSettingsPos-80, 250, 60, 30, "Length")
+    xStringInput = txtInputBox(surface, dynamicSettingsPos - 80, 200, 60, 30, "Strings")
+    yStringInput = txtInputBox(surface, dynamicSettingsPos - 80, 250, 60, 30, "Length")
     xStringInput.update()
     yStringInput.update()
 
     surface.fill((255, 255, 255))
 
-    cp = ColorPicker(dynamicSettingsPos-80, 450, 200, 40, False)
-    cpGreyscale = ColorPicker(dynamicSettingsPos-40, 450, 200, 40, True)
+    cp = ColorPicker(dynamicSettingsPos - 80, 450, 200, 40, False)
+    cpGreyscale = ColorPicker(dynamicSettingsPos - 40, 450, 200, 40, True)
     currentColor = cp.color
 
     editGridSize = 25
     maxKnots = 30
     editScreenSpacing = 25
 
-    displayEditGrid = button(surface, dynamicSettingsPos-80, 300, 60, 30, "Load")
-    displayInstruction = button(surface, dynamicSettingsPos-80, 100, 60, 30, "Apply")
-    clearGrid = button(surface, dynamicSettingsPos-80, 160, 60, 30, "Clear")
+    displayEditGrid = button(surface, dynamicSettingsPos - 80, 300, 60, 30, "Load")
+    displayInstruction = button(surface, dynamicSettingsPos - 80, 100, 60, 30, "Apply")
+    clearGrid = button(surface, dynamicSettingsPos - 80, 160, 60, 30, "Clear")
     hasCreatedBitmap = False
     firstGridUse = True
-    #x = 2
-    #y = 100
+
     yScroll = 0
     scrollWindow = pg.Surface((1, 1))
 
     # check if a pattern has already been created and if so displays it, useful when returning
-    #from instructionsScreen
+    # from instructionsScreen
     if not knotMap is None:
         y = 100
         x = 2
-        if round(surface.get_width()/2) + knotMap.width * editScreenSpacing > surface.get_width()-60:
+        if round(surface.get_width() / 2) + knotMap.width * editScreenSpacing > surface.get_width() - 60:
             editGridSize = ((maxKnots * editGridSize + (maxKnots - 1)) - (knotMap.width - 1)) // knotMap.width
 
         gridWidth = knotMap.width * editGridSize + (knotMap.width - 1)
@@ -506,46 +539,48 @@ def main():
         hasCreatedBitmap = True
         firstGridUse = False
 
-    # keep the display updating by checking if editScreen is True
-    while editScreen:
+    # keep the display updating until the program returns
+    while True:
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 pg.quit()
                 return
 
-      		# if the left click is being held down get mouse position and check if it is on a knot, updating it if so
+            # if the left click is being held down get mouse position and check if it is on a knot, updating it if so
             if pg.mouse.get_pressed()[0]:
                 if hasCreatedBitmap == True:
                     xScrollWindow, y = pg.mouse.get_pos()
                     editBitmap(scrollWindow, (xScrollWindow - x, y + yScroll), knotMap, editGridSize, currentColor)
 
-			# if the left click is click check if the mouse is over any buttons
+                # if the left click is click check if the mouse is over any buttons
             if event.type == pg.MOUSEBUTTONDOWN:
                 if event.button == 1:  # left click
-                             
-					# if an integer value is entered into “Strings” and “Length” and the “Load” button
+
+                    # if an integer value is entered into “Strings” and “Length” and the “Load” button
                     # is pressed create and display a new grid
                     if xStringInput.txt.isdigit() and yStringInput.txt.isdigit() and displayEditGrid.isPressed(event):
                         if not int(xStringInput.txt) < 1:
                             x = 2
                             y = 100
-                            editGridSize =  25
+                            editGridSize = 25
 
-                            if firstGridUse == False: # removes previous grid by setting scrollWindow to white
+                            if firstGridUse == False:  # removes previous grid by setting scrollWindow to white
                                 scrollWindow.fill((255, 255, 255))
                                 x = (surface.get_width() - gridWidth) // 2
-                                surface.blit(scrollWindow, (x, 0), area=pg.Rect(0, yScroll, surface.get_width(), surface.get_height()))
-                                x  =  2
-								
-                             # if the width of the grid is more than 30 make the squares smaller so they take up less space
-                            if round(surface.get_width()/2) + int(xStringInput.txt) * editScreenSpacing > surface.get_width()-60:
+                                surface.blit(scrollWindow, (x, 0),
+                                             area=pg.Rect(0, yScroll, surface.get_width(), surface.get_height()))
+                                x = 2
+
+                            # if the width of the grid is more than 30 make the squares smaller so they take up less space
+                            if round(surface.get_width() / 2) + int(xStringInput.txt) * editScreenSpacing > surface.get_width() - 60:
                                 editGridSize = ((maxKnots * editGridSize + (maxKnots - 1)) - (int(xStringInput.txt) - 1)) // int(xStringInput.txt)
-				
-                			# center, save, and display the new grid
+
+                            # center, save, and display the new grid
                             gridWidth = int(xStringInput.txt) * editGridSize + (int(xStringInput.txt) - 1)
                             scrollWindow = pg.Surface((gridWidth, y + int(yStringInput.txt) * editScreenSpacing + 100))
                             scrollWindow.fill((255, 255, 255))
-                            knotMap = createBitmap(scrollWindow, x, y, editGridSize, knotMap, True, int(xStringInput.txt), int(yStringInput.txt))
+                            knotMap = createBitmap(scrollWindow, x, y, editGridSize, knotMap, defaultColor, True,
+                                                   int(xStringInput.txt), int(yStringInput.txt))
                             x = (surface.get_width() - gridWidth) // 2
 
                             if knotMap.width <= 1:
@@ -559,27 +594,29 @@ def main():
                             hasCreatedBitmap = True
                             firstGridUse = False
 
-		# if “Apply” has been pressed set editScreen to False, the program will open instructionScreen.
+                    # if “Apply” has been pressed return, the master loop will open instructionScreen() (second screen)
                     if displayInstruction.isPressed(event) and hasCreatedBitmap:
                         if not knotMap.width <= 1:
-                            editScreen = False
+                            return knotMap
 
-                    if clearGrid.isPressed(event) and hasCreatedBitmap: #if there is  already  a grid loop through the  color and set everything to grey
+                    # if there is already a grid loop through the color and set everything to grey
+                    if clearGrid.isPressed(event) and hasCreatedBitmap:
                         y = 100
                         x = 2
-                        knotMap = createBitmap(scrollWindow, x, y, editGridSize, knotMap, True, knotMap.width, knotMap.length)
+                        knotMap = createBitmap(scrollWindow, x, y, editGridSize, knotMap, True, knotMap.width,knotMap.length)
                         x = (surface.get_width() - gridWidth) // 2
 
-  		# if the mouse is right-clicked set the currentColor to whatever the color is at the position of the mouse. (Basically copy-paste)
-                elif event.button == 3:  #right click
+                # if the mouse is right-clicked set the currentColor to whatever the color is at the position of the
+                # mouse and the RGB color picker's circle is updated to show that. (Basically copy-paste)
+                elif event.button == 3:  # right click
                     currentColor = surface.get_at(pg.mouse.get_pos())
-                    cp.update(surface)
+                    cp.color = currentColor
 
-	# if the scrollwheel moves then redraw scrollWindow and that y position
-            elif event.type == pg.MOUSEWHEEL:
+            # if the scroll wheel moves and a bitmap has been created then redraw scrollWindow and the y position
+            elif event.type == pg.MOUSEWHEEL and hasCreatedBitmap == True:
                 yScroll -= event.y * 30.5
 
-	# update the text boxes
+            # update the text boxes
             xStringInput.event(event)
             xStringInput.update()
             xStringInput.displayTxt()
@@ -587,7 +624,7 @@ def main():
             yStringInput.update()
             yStringInput.displayTxt()
 
-	# sets the current color to which ever color was selected last
+            # sets the current color to which ever color was selected last
             if cp.update(surface) != None:
                 currentColor = cp.color
             elif cpGreyscale.update(surface) != None:
@@ -600,9 +637,7 @@ def main():
         pg.display.flip()
         clock.tick(60)
 
-
+# keep the program looping infinitely until the user closes it.
 while True:
-    if  editScreen:
-        main()
-    elif editScreen == False:
-        instructionScreen()
+    knotMap = main(knotMap)
+    instructionScreen()
