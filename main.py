@@ -240,7 +240,8 @@ def createBitmap(screen, x, y, size, bitmap, defaultColor, create=False, width=0
     if create == True:
         return bitmap
 
-def visualPattern(y):
+# this function creates a surface to draw on and creates the pattern on to it before retrning the surface
+def visualPattern(surface, knotMap, y):
     # initialize variables
     size = 18
     knotCount = 0
@@ -461,7 +462,7 @@ def instructionScreen():
     save = button(surface, 30, 100, 60, 30, "Save")
 
     # this is where the pattern will appear on the screen
-    scrollWindow, gridWidth = visualPattern(100)
+    scrollWindow, gridWidth = visualPattern(surface, knotMap, 100)
 
     # use the total width of the pattern in center it in the middle of the screen
     x = (surface.get_width() - gridWidth) // 2
