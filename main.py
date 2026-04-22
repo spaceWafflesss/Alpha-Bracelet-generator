@@ -638,6 +638,8 @@ def main(knotMap):
                 # mouse and the RGB color picker's circle is updated to show that. (Basically copy-paste)
                 elif event.button == 3:  # right click
                     currentColor = surface.get_at(pg.mouse.get_pos())
+                    cp.color = currentColor
+                    cp.update()
 
             xStringInput.event(event)
             xStringInput.update()
