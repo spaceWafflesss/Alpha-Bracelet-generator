@@ -117,6 +117,7 @@ class txtInputBox:
             self.txt_surface = self.largeTxt.render(self.txt, True, (0, 0, 0))
             self.screen.blit(self.txt_surface, (self.txtInput.x + 5, self.txtInput.y + 3))
 
+
     # if a new character is entered or removed the whole text is removed and redrawn by filling  the area with a white rect, this makes sure the current text is always displayed
     def update(self):
         inner = self.txtInput.inflate(-2, -2)
@@ -240,12 +241,20 @@ def createBitmap(screen, x, y, size, bitmap, defaultColor, create=False, width=0
     if create == True:
         return bitmap
 
-# this function creates a surface to draw on and creates the pattern on to it before retrning the surface
+# this function creates a surface to draw on and creates the pattern on to it before returning the surface
 def visualPattern(surface, knotMap, y):
     # initialize variables
     size = 18
     knotCount = 0
     enterStringOffset = 70
+
+    gridMargin = 190
+    # if the width of the grid is closer than 95 pixels to the right hand edge of the screen
+    # make the squares smaller so they take up less space
+    if int(knotMap.width) * size > surface.get_width() - gridMargin:
+        # calculate the max amount of knots by seeing how  many can fit in the width of the screen with a margin
+        maxKnots = (surface.get_width() - gridMargin) // (size)
+        editGridSize = ((maxKnots * size + (maxKnots - 1)) - (knotMap.width - 1)) // knotMap.width
 
     # if the width of the pattern is does not fit in a certain area the size of the pattern is lowered to fit in the same space
     maxKnots = 8
@@ -455,6 +464,7 @@ def visualPattern(surface, knotMap, y):
     # return the surface with the pattern on it and is total width
     return scrollWindow, gridWidth
 
+
 def instructionScreen():
     # initialize buttons and variables
     surface.fill((255, 255, 255))
@@ -532,7 +542,7 @@ def main(knotMap):
     currentColor = cp.color
 
     editGridSize = 25
-    maxKnots = 30
+    gridMargin = 190
     editScreenSpacing = 25
 
     displayEditGrid = button(surface, dynamicSettingsPos - 80, 300, 60, 30, "Load")
@@ -549,7 +559,11 @@ def main(knotMap):
     if not knotMap is None:
         y = 100
         x = 2
-        if round(surface.get_width() / 2) + knotMap.width * editScreenSpacing > surface.get_width() - 60:
+        # if the width of the grid is closer than 95 pixels to the right hand edge of the screen
+        # make the squares smaller so they take up less space
+        if knotMap.width * editScreenSpacing > surface.get_width() - gridMargin:
+            # calculate the max amount of knots by seeing how  many can fit in the width of the screen with a margin
+            maxKnots = (surface.get_width() - gridMargin) // (editScreenSpacing)
             editGridSize = ((maxKnots * editGridSize + (maxKnots - 1)) - (knotMap.width - 1)) // knotMap.width
 
         gridWidth = knotMap.width * editGridSize + (knotMap.width - 1)
@@ -599,8 +613,12 @@ def main(knotMap):
                                              area=pg.Rect(0, yScroll, surface.get_width(), surface.get_height()))
                                 x = 2
 
-                            # if the width of the grid is more than 30 make the squares smaller so they take up less space
-                            if round(surface.get_width() / 2) + int(xStringInput.txt) * editScreenSpacing > surface.get_width() - 60:
+
+                            # if the width of the grid is closer than 95 pixels to the right hand edge of the screen
+                            # make the squares smaller so they take up less space
+                            if int(xStringInput.txt) * editScreenSpacing > surface.get_width() - gridMargin:
+                                # calculate the max amount of knots by seeing how  many can fit in the width of the screen with a margin
+                                maxKnots = (surface.get_width() - gridMargin) // (editScreenSpacing)
                                 editGridSize = ((maxKnots * editGridSize + (maxKnots - 1)) - (int(xStringInput.txt) - 1)) // int(xStringInput.txt)
 
                             # center, save, and display the new grid
@@ -640,6 +658,10 @@ def main(knotMap):
                     currentColor = surface.get_at(pg.mouse.get_pos())
                     cp.color = currentColor
                     cp.update()
+
+            # if the scrollwheel moves then redraw scrollWindow and that y position
+            elif event.type == pg.MOUSEWHEEL:
+                yScroll -= event.y * 30.5
 
             xStringInput.event(event)
             xStringInput.update()
