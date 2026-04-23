@@ -466,6 +466,7 @@ def visualPattern(surface, knotMap, y):
 
 
 def instructionScreen():
+    pg.display.set_caption("Bracelet instructions")
     # initialize buttons and variables
     surface.fill((255, 255, 255))
     back = button(surface, 30, 50, 60, 30, "Back")
@@ -521,6 +522,7 @@ def instructionScreen():
         clock.tick(60)
 
 def main(knotMap):
+    pg.display.set_caption("Create bracelet pattern")
     # begin by initializing the structures, text boxes buttons and sliders
     largeTxt = pg.font.Font(None, 32)
     dynamicSettingsPos = surface.get_width()
@@ -553,7 +555,6 @@ def main(knotMap):
 
     yScroll = 0
     scrollWindow = pg.Surface((1, 1))
-
     # check if a pattern has already been created and if so displays it, useful when returning
     # from instructionsScreen
     if not knotMap is None:
@@ -620,22 +621,30 @@ def main(knotMap):
                                 # calculate the max amount of knots by seeing how  many can fit in the width of the screen with a margin
                                 maxKnots = (surface.get_width() - gridMargin) // (editScreenSpacing)
                                 editGridSize = ((maxKnots * editGridSize + (maxKnots - 1)) - (int(xStringInput.txt) - 1)) // int(xStringInput.txt)
+                                print(editGridSize)
 
-                            # center, save, and display the new grid
-                            gridWidth = int(xStringInput.txt) * editGridSize + (int(xStringInput.txt) - 1)
-                            scrollWindow = pg.Surface((gridWidth, y + int(yStringInput.txt) * editScreenSpacing + 100))
-                            scrollWindow.fill((255, 255, 255))
-                            knotMap = createBitmap(scrollWindow, x, y, editGridSize, knotMap, defaultColor, True,
-                                                   int(xStringInput.txt), int(yStringInput.txt))
-                            x = (surface.get_width() - gridWidth) // 2
+                            if not editGridSize < 1:
+                                # center, save, and display the new grid
+                                gridWidth = int(xStringInput.txt) * editGridSize + (int(xStringInput.txt) - 1)
+                                scrollWindow = pg.Surface((gridWidth, y + int(yStringInput.txt) * editScreenSpacing + 100))
+                                scrollWindow.fill((255, 255, 255))
+                                knotMap = createBitmap(scrollWindow, x, y, editGridSize, knotMap, defaultColor, True,
+                                                       int(xStringInput.txt), int(yStringInput.txt))
+                                x = (surface.get_width() - gridWidth) // 2
 
-                            if knotMap.width <= 1:
+                            # if the grid is 1 or less or the grid is too big, display a warning
+                            if not knotMap is None and knotMap.width <= 1:
                                 text = largeTxt.render("Pattern too small", True, (255, 0, 0))
+                                surface.blit(text, (surface.get_width() // 2 + 20, 20))
+                            elif editGridSize < 1:
+                                text = largeTxt.render("Pattern too big", True, (255, 0, 0))
+                                surface.blit(text, (surface.get_width() // 2 + 20, 20))
                             else:
-                                text = largeTxt.render("Pattern too small", True, (255, 255, 255))
+                                pg.draw.rect(surface, (255, 255, 255), (surface.get_width() // 2 + 20, 20, 200, 20))
 
-                            surface.blit(text, (surface.get_width() // 2 + 20, 20))
                             pg.display.flip()
+
+
 
                             hasCreatedBitmap = True
                             firstGridUse = False
