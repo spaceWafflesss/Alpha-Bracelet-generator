@@ -176,7 +176,7 @@ class knotList:
 # if it’s position matches the mouse’s.
 def editBitmap(screen, pos, bitmap, size, color=0):
     spacing = size + 1
-    if not len(bitmap.braceletKnots) == 0:
+    if not bitmap is None:
         found = False
 
         knotCount = 0
@@ -645,7 +645,6 @@ def main(knotMap):
                             pg.display.flip()
 
 
-
                             hasCreatedBitmap = True
                             firstGridUse = False
 
@@ -656,9 +655,10 @@ def main(knotMap):
 
                     # if there is already a grid loop through the color and set everything to grey
                     if clearGrid.isPressed(event) and hasCreatedBitmap:
+                        print("okk10")
                         y = 100
                         x = 2
-                        knotMap = createBitmap(scrollWindow, x, y, editGridSize, knotMap, True, knotMap.width,knotMap.length)
+                        knotMap = createBitmap(scrollWindow, x, y, editGridSize, knotMap, defaultColor, True, knotMap.width, knotMap.length)
                         x = (surface.get_width() - gridWidth) // 2
 
                 # if the mouse is right-clicked set the currentColor to whatever the color is at the position of the
