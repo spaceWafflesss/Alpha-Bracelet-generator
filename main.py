@@ -5,6 +5,7 @@ import pygame.gfxdraw as gfx
 import os
 import sys
 
+
 surface = pg.display.set_mode((0, 0), pg.RESIZABLE)  # window
 
 defaultColor = (56, 56, 56)
@@ -23,6 +24,7 @@ class button:
         self.txtInput = pg.Rect(x, y, w, h)
         self.x = x
         self.y = y
+
         self.medTxt = pg.font.Font(None, 20)
         self.text = self.medTxt.render(showTxt, True, (0, 0, 0))
 
@@ -568,7 +570,7 @@ def main(knotMap):
             editGridSize = ((maxKnots * editGridSize + (maxKnots - 1)) - (knotMap.width - 1)) // knotMap.width
 
         gridWidth = knotMap.width * editGridSize + (knotMap.width - 1)
-        scrollWindow = pg.Surface((gridWidth, y + knotMap.length * editScreenSpacing + 100))
+        scrollWindow = pg.Surface((gridWidth, y + knotMap.length * editScreenSpacing + 5))
         scrollWindow.fill((255, 255, 255))
 
         createBitmap(scrollWindow, x, y, editGridSize, knotMap, False)
@@ -621,16 +623,16 @@ def main(knotMap):
                                 # calculate the max amount of knots by seeing how  many can fit in the width of the screen with a margin
                                 maxKnots = (surface.get_width() - gridMargin) // (editScreenSpacing)
                                 editGridSize = ((maxKnots * editGridSize + (maxKnots - 1)) - (int(xStringInput.txt) - 1)) // int(xStringInput.txt)
-                                print(editGridSize)
 
                             if not editGridSize < 1:
                                 # center, save, and display the new grid
                                 gridWidth = int(xStringInput.txt) * editGridSize + (int(xStringInput.txt) - 1)
-                                scrollWindow = pg.Surface((gridWidth, y + int(yStringInput.txt) * editScreenSpacing + 100))
+                                scrollWindow = pg.Surface((gridWidth, y + int(yStringInput.txt) * editScreenSpacing+5))
                                 scrollWindow.fill((255, 255, 255))
                                 knotMap = createBitmap(scrollWindow, x, y, editGridSize, knotMap, defaultColor, True,
                                                        int(xStringInput.txt), int(yStringInput.txt))
                                 x = (surface.get_width() - gridWidth) // 2
+                                firstGridUse = False
 
                             # if the grid is 1 or less or the grid is too big, display a warning
                             if not knotMap is None and knotMap.width <= 1:
@@ -640,13 +642,13 @@ def main(knotMap):
                                 text = largeTxt.render("Pattern too big", True, (255, 0, 0))
                                 surface.blit(text, (surface.get_width() // 2 + 20, 20))
                             else:
-                                pg.draw.rect(surface, (255, 255, 255), (surface.get_width() // 2 + 20, 20, 200, 20))
+                                pg.draw.rect(surface, (255, 255, 255), (surface.get_width() // 2 + 20, 20, 200, 25))
 
                             pg.display.flip()
 
 
                             hasCreatedBitmap = True
-                            firstGridUse = False
+
 
                     # if “Apply” has been pressed return, the master loop will open instructionScreen() (second screen)
                     if displayInstruction.isPressed(event) and hasCreatedBitmap:
@@ -655,7 +657,6 @@ def main(knotMap):
 
                     # if there is already a grid loop through the color and set everything to grey
                     if clearGrid.isPressed(event) and hasCreatedBitmap:
-                        print("okk10")
                         y = 100
                         x = 2
                         knotMap = createBitmap(scrollWindow, x, y, editGridSize, knotMap, defaultColor, True, knotMap.width, knotMap.length)
@@ -669,7 +670,9 @@ def main(knotMap):
                     cp.update()
 
             # if the scrollwheel moves then redraw scrollWindow and that y position
-            elif event.type == pg.MOUSEWHEEL:
+            elif event.type == pg.MOUSEWHEEL and hasCreatedBitmap:
+                pg.draw.rect(surface, (255, 255, 255), (x, -yScroll, scrollWindow.get_width(), scrollWindow.get_height()))
+                #pg.draw.rect(surface, (255, 0, 255), (x, yScroll, knotMap.width * editGridSize + (knotMap.width - 1), knotMap.length * editScreenSpacing))
                 yScroll -= event.y * 30.5
 
             xStringInput.event(event)
