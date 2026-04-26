@@ -250,18 +250,14 @@ def visualPattern(surface, knotMap, y):
     knotCount = 0
     enterStringOffset = 70
 
-    gridMargin = 190
+    gridMargin = 225
     # if the width of the grid is closer than 95 pixels to the right hand edge of the screen
     # make the squares smaller so they take up less space
-    if int(knotMap.width) * size > surface.get_width() - gridMargin:
+    if int(knotMap.width) * size*3 > surface.get_width() - gridMargin:
         # calculate the max amount of knots by seeing how  many can fit in the width of the screen with a margin
-        maxKnots = (surface.get_width() - gridMargin) // (size)
-        editGridSize = ((maxKnots * size + (maxKnots - 1)) - (knotMap.width - 1)) // knotMap.width
+        maxKnots = (surface.get_width() - gridMargin) // (size*3)
+        size = round(((maxKnots * size + (maxKnots - 1)) - (knotMap.width - 1)) // knotMap.width)
 
-    # if the width of the pattern is does not fit in a certain area the size of the pattern is lowered to fit in the same space
-    maxKnots = 8
-    if knotMap.width > maxKnots:
-        size = ((maxKnots * size + (maxKnots - 1)) + (knotMap.width - 1)) // knotMap.width
 
     # various variables to dynamically control the size and position of each shape
     spacing = (size * 3)
@@ -516,6 +512,8 @@ def instructionScreen():
 
             # change vertical pattern location using the scroll wheel input, * 30.5 makes it more responsive
             elif event.type == pg.MOUSEWHEEL:
+                pg.draw.rect(surface, (255, 255, 255),
+                             (x, -yScroll, scrollWindow.get_width(), scrollWindow.get_height()))
                 yScroll -= event.y * 30.5
 
         # display and update the pattern window for any position change
