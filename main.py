@@ -64,7 +64,7 @@ class ColorPicker:
                 value = int(255 * i / self.pwidth)
                 color = (value, value, value)
 
-            pg.draw.rect(self.image, color, (size // 3, i + self.rad, size - 2 * size // 3, 1), border_radius=5)
+            pg.draw.rect(self.image, color, (size // 3, i + self.rad, size - 2 * size // 3, 1))
             screen.blit(self.image, self.rect)
         self.p = 0
 
@@ -251,13 +251,12 @@ def visualPattern(surface, knotMap, y):
     enterStringOffset = 70
 
     gridMargin = 225
-    # if the width of the grid is closer than 95 pixels to the right hand edge of the screen
+    # if the width of the grid is closer than 112.5 pixels to the right hand edge of the screen
     # make the squares smaller so they take up less space
-    if int(knotMap.width) * size*3 > surface.get_width() - gridMargin:
+    if knotMap.width * size*3 > surface.get_width() - gridMargin:
         # calculate the max amount of knots by seeing how  many can fit in the width of the screen with a margin
         maxKnots = (surface.get_width() - gridMargin) // (size*3)
         size = round(((maxKnots * size + (maxKnots - 1)) - (knotMap.width - 1)) // knotMap.width)
-
 
     # various variables to dynamically control the size and position of each shape
     spacing = (size * 3)
@@ -318,13 +317,13 @@ def visualPattern(surface, knotMap, y):
                     if yRow == 0:
                         # center empty rectangle through circles
                         pg.draw.rect(scrollWindow, (0, 0, 0),
-                                     pg.Rect(posX - dynamicSize * -1.5 // 2, y - 50, dynamicSize * -1.5,
-                                             knotMap.length * spacing + 40), 1, border_radius=15)
+                                     pg.Rect(posX - dynamicSize * -1.5 // 2,  posY - spacing * 0.8, dynamicSize * -1.5,
+                                             knotMap.length * spacing * 1.14), 1, border_radius=15)
 
                         # draw grey line in between
                         pg.draw.rect(scrollWindow, (214, 214, 214),
-                                     pg.Rect(posX - dynamicSize * -0.4 // 2, y - 40, dynamicSize * -0.4,
-                                             knotMap.length * spacing + 20), border_radius=15)
+                                     pg.Rect(posX - dynamicSize * -0.4 // 2, posY - spacing * 0.6, dynamicSize * -0.4,
+                                             knotMap.length * spacing * 1.06), border_radius=15)
 
                     # display on both the right and left edge of the pattern which vertical row it is on
                     text = txt.render(str(yRow + 1), True, (128, 128, 128))
@@ -459,8 +458,11 @@ def visualPattern(surface, knotMap, y):
                     # border
                     pg.draw.polygon(scrollWindow, outside, points, 1)
 
+    #  test idea, can I make pattern have resolution and scale down instead?
+    '''if knotMap.width * size * 3 > surface.get_width() - gridMargin:
+        scrollWindow = pg.transform.smoothscale(scrollWindow,(surface.get_width() - gridMargin, y + knotMap.length * spacing+100))'''
     # return the surface with the pattern on it and is total width
-    return scrollWindow, gridWidth
+    return scrollWindow, scrollWindow.get_width()
 
 
 def instructionScreen():
@@ -477,7 +479,7 @@ def instructionScreen():
     x = (surface.get_width() - gridWidth) // 2
 
     yScroll = 0
-
+    xScroll = 0
     # once the pattern has been fully created this loop runs until the user presses the “back” button to return to the
     # first page, it checks where the mouse has been clicked, and moves the pattern as an image if the scroll wheel is moved
     while True:
@@ -515,9 +517,10 @@ def instructionScreen():
                 pg.draw.rect(surface, (255, 255, 255),
                              (x, -yScroll, scrollWindow.get_width(), scrollWindow.get_height()))
                 yScroll -= event.y * 30.5
+                xScroll += event.x * 30.5
 
         # display and update the pattern window for any position change
-        surface.blit(scrollWindow, (x, 0), area=pg.Rect(0, yScroll, surface.get_width(), surface.get_height()))
+        surface.blit(scrollWindow, (x, 0), area=pg.Rect(xScroll, yScroll, surface.get_width(), surface.get_height()))
         pg.display.flip()
         clock.tick(60)
 
