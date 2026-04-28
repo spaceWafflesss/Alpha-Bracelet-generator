@@ -523,10 +523,9 @@ def instructionScreen():
                 pg.draw.rect(surface, (255, 255, 255),
                              (x, -yScroll, scrollWindow.get_width(), scrollWindow.get_height()))
                 yScroll -= event.y * 30.5
-                xScroll += event.x * 30.5
 
         # display and update the pattern window for any position change
-        surface.blit(scrollWindow, (x, 0), area=pg.Rect(xScroll, yScroll, surface.get_width(), surface.get_height()))
+        surface.blit(scrollWindow, (x, 0), area=pg.Rect(0, yScroll, surface.get_width(), surface.get_height()))
         pg.display.flip()
         clock.tick(60)
 
