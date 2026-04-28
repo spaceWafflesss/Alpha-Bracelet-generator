@@ -244,19 +244,13 @@ def createBitmap(screen, x, y, size, bitmap, defaultColor, create=False, width=0
         return bitmap
 
 # this function creates a surface to draw on and creates the pattern on to it before returning the surface
-def visualPattern(surface, knotMap, y):
+def visualPattern(surface, knotMap, y, saveImage=False):
     # initialize variables
     size = 18
     knotCount = 0
     enterStringOffset = 70
 
     gridMargin = 225
-    # if the width of the grid is closer than 112.5 pixels to the right hand edge of the screen
-    # make the squares smaller so they take up less space
-    if knotMap.width * size*3 > surface.get_width() - gridMargin:
-        # calculate the max amount of knots by seeing how  many can fit in the width of the screen with a margin
-        maxKnots = (surface.get_width() - gridMargin) // (size*3)
-        size = round(((maxKnots * size + (maxKnots - 1)) - (knotMap.width - 1)) // knotMap.width)
 
     # various variables to dynamically control the size and position of each shape
     spacing = (size * 3)
@@ -458,11 +452,22 @@ def visualPattern(surface, knotMap, y):
                     # border
                     pg.draw.polygon(scrollWindow, outside, points, 1)
 
-    #  test idea, can I make pattern have resolution and scale down instead?
-    '''if knotMap.width * size * 3 > surface.get_width() - gridMargin:
-        scrollWindow = pg.transform.smoothscale(scrollWindow,(surface.get_width() - gridMargin, y + knotMap.length * spacing+100))'''
-    # return the surface with the pattern on it and is total width
-    return scrollWindow, scrollWindow.get_width()
+
+    if saveImage == True:
+        return scrollWindow
+    else:
+        # if the width of the grid is closer than 112.5 pixels to the right hand edge of the screen
+        # make the surface smaller so they take up less space
+        if knotMap.width * spacing > surface.get_width() - gridMargin:
+            lengthScale = (knotMap.width * spacing) / (surface.get_width() - gridMargin)
+            scrollWindow = pg.transform.smoothscale(scrollWindow,(surface.get_width() - gridMargin, (knotMap.length * spacing)/lengthScale+y))
+
+            #add text to show that this is low resolution
+            smallTxt = pg.font.Font(None, 20)
+            text = smallTxt.render("Low resolution preview, save pattern to view fully", True, (0, 0, 0))
+            scrollWindow.blit(text, (0, 0))
+        # return the surface with the pattern on it and is total width
+        return scrollWindow, scrollWindow.get_width()
 
 
 def instructionScreen():
@@ -508,7 +513,8 @@ def instructionScreen():
                             if os.path.exists(config_path):
                                 i = i + 1
                             else:
-                                pg.image.save(scrollWindow, config_path)
+                                # this saves the high resolution grid
+                                pg.image.save(visualPattern(surface, knotMap, 100, True), config_path)
                                 break
                             config_path = os.path.join(application_path, "bracelet" + str(i) + ".png")
 
