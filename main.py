@@ -619,7 +619,7 @@ def main(knotMap):
                     # if an integer value is entered into “Strings” and “Length” and the “Load” button
                     # is pressed create and display a new grid
                     if xStringInput.txt.isdigit() and yStringInput.txt.isdigit() and displayEditGrid.isPressed(event):
-                        if not int(xStringInput.txt) < 1:
+                        if not int(xStringInput.txt) < 1 and not int(yStringInput.txt) < 1:
                             x = 2
                             y = 100
                             editGridSize = 25
