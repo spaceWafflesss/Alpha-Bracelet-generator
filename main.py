@@ -15,8 +15,8 @@ clock = pg.time.Clock()
 knotMap = None
 
 
-# the button class creates a green button where ever the position is set, and will return whether it has been presses
-# if isPressed is called
+# the button class creates a green button wherever the position is set, and will return whether it has been pressed
+# when isPressed is called
 class button:
     # set button variables and display button with the label text, eg: showTxt=“Apply”
     def __init__(self, screen, x, y, w, h, showTxt=""):
@@ -39,7 +39,7 @@ class button:
             return False
 
 # the color picker creates a slider that goes through a rectangle that displays all colors in RGB or greyscale, if the
-# user dragged the mouse over the rectangle’s surface the circle that represents the current color move the that
+# user drags the mouse over the rectangle’s surface, the circle that represents the current color moves to that
 # vertical position and updates the color to whatever color the rect was under the circle.
 class ColorPicker:
     # set color slider variables and display rect with the full RGB or greyscale spectrum
@@ -68,7 +68,7 @@ class ColorPicker:
             screen.blit(self.image, self.rect)
         self.p = 0
 
-    # check if the mouse location is over the rect surface and if so update the circle to the mouses’s y position
+    # check if the mouse is over the rectangle surface and if so update the circle to the mouses’s y position
     # and update the current color
     def update(self):
         mouse_buttons = pg.mouse.get_pressed()
@@ -131,8 +131,8 @@ class txtInputBox:
         pg.draw.rect(self.screen, self.color, self.txtInput, 2, border_radius=5)
 
     # event is called to check if the mouse has clicked over the text box, if so a boolean is set to true so if text
-    # is entered it adds them to text string, this stops characters being saved even when the user
-    # entering characters to the other text box
+    # is entered it adds them to text string, this stops characters being saved even when the user is
+    # entering characters into the other text box
     def event(self, event):
         if event.type == pg.MOUSEBUTTONDOWN:
             if self.txtInput.collidepoint(event.pos):
@@ -153,8 +153,8 @@ class txtInputBox:
                     self.txt += event.unicode
                     self.displayTxt()
 
-                # if the character being entered is not an integer the text box turns red to show the user t
-                # hey have entered an illegal character
+                # if the character being entered is not an integer the text box turns red to show that the user
+                # has entered an illegal character
                 if not self.txt.isdigit():
                     self.color = (255, 0, 0)
                 else:
@@ -178,14 +178,14 @@ class knotList:
 
 
 # this takes the users mouse position and loops through knotMap, checking the position of each cube in the grid to see
-# if it’s position matches the mouse’s.
+# if its position matches the mouse's position
 def editBitmap(screen, pos, bitmap, size, color=0):
     spacing = size + 1
     if not bitmap is None:
         found = False
 
         knotCount = 0
-        # run until knot with same position is found or loop reaches the end of knotMap
+        # run until a knot with the same position is found or loop reaches the end of knotMap
         while found == False:
             for yRow in range(bitmap.length):
                 for xRow in range(bitmap.width):
@@ -205,7 +205,8 @@ def createBitmap(screen, x, y, size, bitmap, defaultColor, create=False, width=0
 
     # if user wants to create a new bitmap or change the size of the current one.
     if create == True:
-        # if the knotMap has not yet been created or the current bitmap is still the same size as before set the width and length and set all knots (pixels) to the default color (grey) and draw the pattern
+        # if the knotMap has not yet been created or the current bitmap is still the same size as before set the width
+        # and length and set all knots (pixels) to the default color (gray) and draw the pattern
         if bitmap == None or bitmap.width == width and bitmap.length == length:
             bitmap = knotList(width, length)
             bitmap.x = x
@@ -215,7 +216,10 @@ def createBitmap(screen, x, y, size, bitmap, defaultColor, create=False, width=0
             for knot in range(bitmap.width * bitmap.length):
                 bitmap.braceletKnots.append(bitmap.knotInfo(defaultColor))
 
-        # else if the bitmap already exists and the user entered a new width or length, change the size of the bitmap by adding or removing the difference of size in width or height, this allows the user to change there side without loosing what they were previously working on, if the new size is smaller then any knot that have been created in that area will be removed.
+        # else if the bitmap already exists and the user entered a new width or length, change the size of the bitmap by
+        # adding or removing the difference of size in width or height, this allows the user to change their size
+        # without losing what they were previously working on, if the new size is smaller than any knot that have been
+        # created in that area will be removed.
         else:
             for runDownList in range(bitmap.length - 1, - 1, - 1):
                 for difference in range(abs(bitmap.width - width)):
@@ -284,7 +288,7 @@ def visualPattern(surface, knotMap, y, saveImage=False):
     head = w * 0.4
     body = w - head
 
-    # this for loop runs through the pattern twice so they take shapes are displayed correctly, not overlapping over each other.
+    # this for loop runs through the pattern twice so the shapes are displayed correctly, not overlapping over each other.
     for run in range(0, 2):
 
         # for loop runs first down the length of the loop
@@ -328,7 +332,7 @@ def visualPattern(surface, knotMap, y, saveImage=False):
                                              posY - size // 4))  # right side
                     scrollWindow.blit(text, ((posX - xRow * spacing) - 70, posY - size // 4))  # left side
 
-                    # adding gray lines pointing to the position so it is clear, useful for the user to keep track if
+                    # adding gray lines pointing to the position so it is clear, useful for the user to keep track of
                     # where they are, connected to the gray text above
                     if direction:  # ->
                         if xRow == knotMap.width - 1:
@@ -362,7 +366,7 @@ def visualPattern(surface, knotMap, y, saveImage=False):
 
                     # this while draws the lines between the knots that shows where the strings are supposed to go next
                     # by checking what the current knot color is, and looping through the lineCords list to check if an
-                    # older when is there, if there is a line is created between the current and previous of the same color
+                    # older one is there, if there is, a line that is created between the current and previous of the same color
                     lining = True
                     i = 0
                     while lining:
@@ -461,7 +465,7 @@ def visualPattern(surface, knotMap, y, saveImage=False):
         return scrollWindow
     else:
         # if the width of the grid is closer than 112.5 pixels to the right hand edge of the screen
-        # make the surface smaller so they take up less space
+        # make the surface smaller so it takes up less space
         if knotMap.width * spacing > surface.get_width() - gridMargin:
             lengthScale = (knotMap.width * spacing) / (surface.get_width() - gridMargin)
             scrollWindow = pg.transform.smoothscale(scrollWindow,(surface.get_width() - gridMargin, (knotMap.length * spacing)/lengthScale+y))
@@ -484,7 +488,7 @@ def instructionScreen():
     # this is where the pattern will appear on the screen
     scrollWindow, gridWidth = visualPattern(surface, knotMap, 100)
 
-    # use the total width of the pattern in center it in the middle of the screen
+    # use the total width of the pattern in the center to put it in the middle of the screen
     x = (surface.get_width() - gridWidth) // 2
 
     yScroll = 0
@@ -498,11 +502,11 @@ def instructionScreen():
             if event.type == pg.MOUSEBUTTONDOWN:
                 if event.button == 1:  # left click
 
-                    # exist function and return to master loop
+                    # exit the function and return to the main loop
                     if back.isPressed(event):
                         return
                     # if the save button is pressed check if this program is an exe file or running in an IDE, then
-                    # creating a png of the pattern in scrollWindow in the same location as the program.
+                    # creating a png of the pattern in scrollWindow in the same directory as the program.
                     if save.isPressed(event):
                         if getattr(sys, 'frozen', False):
                             application_path = os.path.dirname(sys.executable)
