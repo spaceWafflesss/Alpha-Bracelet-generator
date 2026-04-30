@@ -129,9 +129,7 @@ class txtInputBox:
     def update(self):
         inner = self.txtInput.inflate(-2, -2)
         self.screen.fill((255, 255, 255), inner)
-        width = max(self.w, self.txt_surface.get_width() + 10)
         self.txtInput.w = self.w
-        #pg.draw.rect(self.screen, self.color, self.txtInput, 2, border_radius=5)
         pg.draw.rect(self.screen, self.color, self.txtInput, 2, border_radius=5)
 
     # event is called to check if the mouse has clicked over the text box, if so a boolean is set to true so if text
