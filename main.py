@@ -117,17 +117,21 @@ class txtInputBox:
         if self.txt == "":
             self.screen.blit(self.text, (self.x + 5, self.y + 5))
         else:
+            #render the text and calculate the area on the left to hide if there are more letters than space
             self.txt_surface = self.largeTxt.render(self.txt, True, (0, 0, 0))
-            self.screen.blit(self.txt_surface, (self.txtInput.x + 5, self.txtInput.y + 3))
+            offset = max(0, self.txt_surface.get_width() - self.w + 6)
+            crop = (offset, 0, self.w, self.txt_surface.get_height())
+            self.screen.blit(self.txt_surface, (self.txtInput.x + 5, self.txtInput.y + 3), crop)
 
 
     # if a new character is entered or removed the whole text is removed and redrawn by filling the area with a white
-    # rect, this makes sure the current text is always displayed
+    # rectangle, this makes sure the current text is always displayed
     def update(self):
         inner = self.txtInput.inflate(-2, -2)
         self.screen.fill((255, 255, 255), inner)
         width = max(self.w, self.txt_surface.get_width() + 10)
-        self.txtInput.w = width
+        self.txtInput.w = self.w
+        #pg.draw.rect(self.screen, self.color, self.txtInput, 2, border_radius=5)
         pg.draw.rect(self.screen, self.color, self.txtInput, 2, border_radius=5)
 
     # event is called to check if the mouse has clicked over the text box, if so a boolean is set to true so if text
@@ -460,7 +464,8 @@ def visualPattern(surface, knotMap, y, saveImage=False):
                     # border
                     pg.draw.polygon(scrollWindow, outside, points, 1)
 
-
+    # if the pattern is being created to save it externally return the scrollWindow in the original size (full resolution)
+    # if not check if the scrollWindow surface is bigger then the main screen, if so resize it so it's smaller
     if saveImage == True:
         return scrollWindow
     else:
@@ -496,9 +501,12 @@ def instructionScreen():
     # first page, it checks where the mouse has been clicked, and moves the pattern as an image if the scroll wheel is moved
     while True:
         for event in pg.event.get():
+
+            # end the program if the user closes the window
             if event.type == pg.QUIT:
-                pg.quit()
-                return
+                #pg.quit()
+                sys.exit()
+
             if event.type == pg.MOUSEBUTTONDOWN:
                 if event.button == 1:  # left click
 
@@ -597,9 +605,11 @@ def main(knotMap):
     # keep the display updating until the program returns
     while True:
         for event in pg.event.get():
+
+            #end the program if the user closes the window
             if event.type == pg.QUIT:
                 pg.quit()
-                return
+                sys.exit()
 
             # if the left click is being held down get mouse position and check if it is on a knot, updating it if so.
             if pg.mouse.get_pressed()[0]:
