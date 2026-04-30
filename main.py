@@ -465,7 +465,7 @@ def visualPattern(surface, knotMap, y, saveImage=False):
                     pg.draw.polygon(scrollWindow, outside, points, 1)
 
     # if the pattern is being created to save it externally return the scrollWindow in the original size (full resolution)
-    # if not check if the scrollWindow surface is bigger then the main screen, if so resize it so it's smaller
+    # if not, check if the scrollWindow surface is bigger then the main screen, if so resize it so it's smaller
     if saveImage == True:
         return scrollWindow
     else:
