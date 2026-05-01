@@ -321,12 +321,12 @@ def visualPattern(surface, knotMap, y, saveImage=False):
                         # center empty rectangle through circles
                         pg.draw.rect(scrollWindow, (0, 0, 0),
                                      pg.Rect(posX - dynamicSize * -1.5 // 2,  posY - spacing * 0.8, dynamicSize * -1.5,
-                                             knotMap.length * spacing * 1.14), 1, border_radius=15)
+                                             knotMap.length * spacing + 30), 1, border_radius=15)
 
                         # draw gray line in between
                         pg.draw.rect(scrollWindow, (214, 214, 214),
                                      pg.Rect(posX - dynamicSize * -0.4 // 2, posY - spacing * 0.6, dynamicSize * -0.4,
-                                             knotMap.length * spacing * 1.06), border_radius=15)
+                                             knotMap.length * spacing + 15), border_radius=15)
 
                     # display on both the right and left edge of the pattern which vertical row it is on
                     text = txt.render(str(yRow + 1), True, (128, 128, 128))
